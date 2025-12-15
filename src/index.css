@@ -101,28 +101,3 @@ html.cyberpunk .bg-indigo-600 {
   background-color: #ff00ff !important;
   box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
 }
-
-/* --- Forest Theme Overrides --- */
-html.forest body {
-  background-color: #0c1a15;
-  color: #e0eadd;
-}
-html.forest .glass-panel {
-  background: rgba(12, 26, 21, 0.9);
-  border-bottom: 1px solid #2d6a4f;
-}
-html.forest .dark\:bg-slate-800, 
-html.forest .dark\:bg-slate-900 {
-  background-color: #1b4332 !important;
-  border-color: #2d6a4f !important;
-}
-html.forest .text-indigo-600, 
-html.forest .dark\:text-indigo-400 {
-  color: #95d5b2 !important;
-}
-html.forest .bg-indigo-600 {
-  background-color: #40916c !important;
-}
-html.forest .dark\:text-slate-400 {
-  color: #b7e4c7 !important;
-}
