@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Header, Theme } from './components/Header';
 import { FilterBar } from './components/FilterBar';
 import { RankCard } from './components/RankCard';
