@@ -57,7 +57,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 onClick={() => setArena(a)}
             >
                 <MapPin className={cn("w-3 h-3 mr-1.5", arena === a ? 'fill-current' : '')} />
-                {a === 'Arena A' ? '赛区 A' : '赛区 B'}
+                {a === 'Arena A' ? '大学城' : '李家村'}
             </TabsTrigger>
         ))}
       </TabsList>
