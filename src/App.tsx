@@ -10,7 +10,7 @@ export default function App() {
   useEffect(() => {
     const root = document.documentElement;
     // Reset all
-    root.classList.remove('dark', 'cyberpunk', 'forest');
+    root.classList.remove('dark', 'cyberpunk');
     
     if (theme === 'dark') {
       root.classList.add('dark');
