@@ -65,6 +65,33 @@ body {
   transition: width 500ms ease-out;
 }
 
+.radar svg {
+  display: block;
+}
+.radar .grid line,
+.radar .grid circle {
+  stroke: rgba(100,116,139,0.25);
+}
+.dark .radar .grid line,
+.dark .radar .grid circle {
+  stroke: rgba(148,163,184,0.25);
+}
+.radar .shape {
+  fill: rgba(99,102,241,0.12);
+  stroke: #6366f1;
+}
+.dark .radar .shape {
+  fill: rgba(99,102,241,0.18);
+  stroke: #22d3ee;
+}
+.radar .axis text {
+  font-size: 10px;
+  fill: #475569;
+}
+.dark .radar .axis text {
+  fill: #cbd5e1;
+}
+
 .medal-1 {
   background: linear-gradient(90deg, #f59e0b, #facc15, #fde68a, #f59e0b);
   background-size: 300% 300%;
