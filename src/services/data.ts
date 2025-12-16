@@ -12,7 +12,7 @@ type Raw = {
   pt: number;
 };
 
-const RAW: Raw[] = [
+const RAW_DEC_W2: Raw[] = [
   { name: '小五郎', games: 16, first: 4, second: 7, third: 3, fourth: 2, bifei: 0, total: 485700, pt: 135.7 },
   { name: '私权分析与建构', games: 8, first: 4, second: 2, third: 1, fourth: 1, bifei: 0, total: 230600, pt: 120.6 },
   { name: '豚豚', games: 12, first: 4, second: 5, third: 1, fourth: 2, bifei: 0, total: 343600, pt: 113.6 },
@@ -34,6 +34,22 @@ const RAW: Raw[] = [
   { name: '玄武湖冲浪手', games: 4, first: 0, second: 1, third: 1, fourth: 2, bifei: 1, total: 60400, pt: -89.6 },
   { name: '朱哥', games: 7, first: 1, second: 1, third: 1, fourth: 4, bifei: 2, total: 109200, pt: -125.8 },
   { name: 'fishone', games: 9, first: 0, second: 1, third: 2, fourth: 6, bifei: 2, total: 97700, pt: -267.3 },
+];
+
+// 2025年12月 第1周 大学城（Arena A）数据
+const RAW_DEC_W1: Raw[] = [
+  { name: '肖小', games: 18, first: 6, second: 5, third: 5, fourth: 2, bifei: 1, total: 529600, pt: 169.6 },
+  { name: '衣锦鲤', games: 6, first: 2, second: 3, third: 1, fourth: 1, bifei: 0, total: 191100, pt: 91.1 },
+  { name: '不完备定理', games: 6, first: 2, second: 2, third: 1, fourth: 1, bifei: 1, total: 179500, pt: 59.5 },
+  { name: '小五郎', games: 12, first: 4, second: 2, third: 3, fourth: 3, bifei: 1, total: 317500, pt: 47.5 },
+  { name: 'Orin', games: 6, first: 2, second: 2, third: 0, fourth: 2, bifei: 0, total: 163900, pt: 33.9 },
+  { name: '我是战斗贼', games: 2, first: 1, second: 0, third: 0, fourth: 1, bifei: 0, total: 57700, pt: 27.7 },
+  { name: '右手第一张', games: 6, first: 2, second: 2, third: 1, fourth: 0, bifei: 2, total: 154900, pt: 24.9 },
+  { name: '摸鱼玩家', games: 2, first: 0, second: 1, third: 1, fourth: 0, bifei: 0, total: 44900, pt: -15.1 },
+  { name: '小钉子儿', games: 6, first: 1, second: 0, third: 3, fourth: 2, bifei: 2, total: 138800, pt: -51.2 },
+  { name: '鸡打狗摸', games: 14, first: 3, second: 3, third: 5, fourth: 3, bifei: 2, total: 290600, pt: -79.4 },
+  { name: '朱哥', games: 6, first: 1, second: 0, third: 3, fourth: 2, bifei: 3, total: 117100, pt: -82.9 },
+  { name: '椰不群', games: 12, first: 0, second: 4, third: 2, fourth: 6, bifei: 2, total: 214400, pt: -225.6 },
 ];
 
 function toCompetitors(rows: Raw[]): Competitor[] {
@@ -67,7 +83,7 @@ function toCompetitors(rows: Raw[]): Competitor[] {
 
 export const MOCK_DATA: RankData = {
   weekly: {
-    individual: toCompetitors(RAW),
+    individual: toCompetitors(RAW_DEC_W1),
     team: [],
   },
   monthly: {
@@ -81,7 +97,8 @@ function key(month: string, week: number | 'Monthly', arena: Arena, category: Ra
 }
 
 const DATASETS: Record<string, Competitor[]> = {
-  [key('2025年12月', 2, 'Arena A', 'individual')]: toCompetitors(RAW),
+  [key('2025年12月', 2, 'Arena A', 'individual')]: toCompetitors(RAW_DEC_W2),
+  [key('2025年12月', 1, 'Arena A', 'individual')]: toCompetitors(RAW_DEC_W1),
 };
 
 export function getRankData(month: string, week: number | 'Monthly', arena: Arena, category: RankCategory): Competitor[] {
