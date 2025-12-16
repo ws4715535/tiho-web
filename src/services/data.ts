@@ -83,7 +83,7 @@ function toCompetitors(rows: Raw[]): Competitor[] {
 
 export const MOCK_DATA: RankData = {
   weekly: {
-    individual: toCompetitors(RAW_DEC_W1),
+    individual: toCompetitors(RAW_DEC_W2),
     team: [],
   },
   monthly: {
@@ -101,6 +101,46 @@ const DATASETS: Record<string, Competitor[]> = {
   [key('2025年12月', 1, 'Arena A', 'individual')]: toCompetitors(RAW_DEC_W1),
 };
 
+const RAWSETS: Record<string, Raw[]> = {
+  [key('2025年12月', 2, 'Arena A', 'individual')]: RAW_DEC_W2,
+  [key('2025年12月', 1, 'Arena A', 'individual')]: RAW_DEC_W1,
+};
+
+function aggregateMonthlyRaw(month: string, arena: Arena, category: RankCategory): Raw[] {
+  const rows: Raw[] = [];
+  const prefix = `${month}|`;
+  const suffix = `|${arena}|${category}`;
+  Object.keys(RAWSETS).forEach(k => {
+    if (k.startsWith(prefix) && k.endsWith(suffix)) {
+      rows.push(...RAWSETS[k]);
+    }
+  });
+  const agg = new Map<string, Raw>();
+  for (const r of rows) {
+    const prev = agg.get(r.name);
+    if (!prev) {
+      agg.set(r.name, { ...r });
+    } else {
+      agg.set(r.name, {
+        name: r.name,
+        games: prev.games + r.games,
+        first: prev.first + r.first,
+        second: prev.second + r.second,
+        third: prev.third + r.third,
+        fourth: prev.fourth + r.fourth,
+        bifei: prev.bifei + r.bifei,
+        total: prev.total + r.total,
+        pt: Number((prev.pt + r.pt).toFixed(1)),
+      });
+    }
+  }
+  return Array.from(agg.values());
+}
+
 export function getRankData(month: string, week: number | 'Monthly', arena: Arena, category: RankCategory): Competitor[] {
+  if (week === 'Monthly') {
+    const raw = aggregateMonthlyRaw(month, arena, category);
+    return toCompetitors(raw);
+  }
   return DATASETS[key(month, week, arena, category)] ?? [];
 }
