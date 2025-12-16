@@ -29,7 +29,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   
   // Logic to switch months mock
   const handleMonthChange = (direction: 'prev' | 'next') => {
-      const months = ['2024年1月', '2024年2月', '2024年3月', '2024年4月'];
+      const months = ['2025年12月'];
       const idx = months.indexOf(month);
       if (direction === 'prev' && idx > 0) setMonth(months[idx - 1]);
       if (direction === 'next' && idx < months.length - 1) setMonth(months[idx + 1]);

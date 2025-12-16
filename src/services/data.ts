@@ -1,66 +1,89 @@
-import { RankData, Competitor, Member } from "../types";
+import { RankData, Competitor, Arena, RankCategory } from "../types";
 
-const TEAM_NAMES = ['风林火山', '樱花缭乱', '七武士', '碎瓦团', '龙之眼'];
-
-const generateMembers = (teamName: string): Member[] => {
-  const count = 4;
-  return Array.from({ length: count }).map((_, i) => ({
-    name: `${teamName.substring(0, 2)} ${String.fromCharCode(65 + i)}`,
-    role: i === 0 ? 'Captain' : i === 1 ? 'Vice' : 'Member',
-    avatarStr: String.fromCharCode(65 + i)
-  }));
+type Raw = {
+  name: string;
+  games: number;
+  first: number;
+  second: number;
+  third: number;
+  fourth: number;
+  bifei: number;
+  total: number;
+  pt: number;
 };
 
-const generateCompetitors = (count: number, isTeam: boolean): Competitor[] => {
-  return Array.from({ length: count }).map((_, i) => {
-    const rank = i + 1;
-    // Score correlates roughly with rank but with some randomness
-    const baseScore = 500 - (i * 40); 
-    const score = Math.floor(baseScore + (Math.random() * 60 - 30));
-    
-    // Avg order correlates with rank
-    const baseOrder = 2.00 + (i * 0.1);
-    const avgOrder = Math.min(4.00, Math.max(1.00, Number((baseOrder + (Math.random() * 0.4 - 0.2)).toFixed(2))));
+const RAW: Raw[] = [
+  { name: '小五郎', games: 16, first: 4, second: 7, third: 3, fourth: 2, bifei: 0, total: 485700, pt: 135.7 },
+  { name: '私权分析与建构', games: 8, first: 4, second: 2, third: 1, fourth: 1, bifei: 0, total: 230600, pt: 120.6 },
+  { name: '豚豚', games: 12, first: 4, second: 5, third: 1, fourth: 2, bifei: 0, total: 343600, pt: 113.6 },
+  { name: 'Misakaa', games: 5, first: 2, second: 2, third: 0, fourth: 1, bifei: 0, total: 189300, pt: 104.3 },
+  { name: 'placebo', games: 4, first: 2, second: 1, third: 0, fourth: 1, bifei: 0, total: 131000, pt: 81 },
+  { name: '柳越', games: 3, first: 2, second: 1, third: 0, fourth: 0, bifei: 0, total: 103400, pt: 58.4 },
+  { name: '竹依轻风', games: 5, first: 2, second: 0, third: 3, fourth: 0, bifei: 0, total: 137000, pt: 42 },
+  { name: '月夜繁星', games: 4, first: 1, second: 1, third: 1, fourth: 1, bifei: 0, total: 136700, pt: 36.7 },
+  { name: '猪柳蛋汉堡', games: 9, first: 1, second: 5, third: 3, fourth: 0, bifei: 0, total: 259900, pt: 34.9 },
+  { name: '恶调', games: 5, first: 2, second: 1, third: 1, fourth: 1, bifei: 1, total: 122700, pt: 27.7 },
+  { name: '肖小', games: 3, first: 1, second: 0, third: 1, fourth: 1, bifei: 0, total: 78600, pt: 3.6 },
+  { name: '椰不群', games: 3, first: 1, second: 0, third: 1, fourth: 1, bifei: 0, total: 77100, pt: 2.1 },
+  { name: '小钉子儿', games: 5, first: 2, second: 0, third: 1, fourth: 2, bifei: 1, total: 110000, pt: -5 },
+  { name: 'Orin', games: 2, first: 0, second: 1, third: 1, fourth: 0, bifei: 0, total: 53700, pt: -6.3 },
+  { name: '沙漠孤狼001', games: 1, first: 0, second: 0, third: 1, fourth: 0, bifei: 0, total: 16500, pt: -18.5 },
+  { name: '且行', games: 4, first: 1, second: 0, third: 2, fourth: 1, bifei: 1, total: 76400, pt: -33.6 },
+  { name: '邮寄碎片', games: 3, first: 0, second: 0, third: 2, fourth: 1, bifei: 0, total: 69500, pt: -45.5 },
+  { name: '小卡比兽', games: 5, first: 1, second: 0, third: 1, fourth: 3, bifei: 1, total: 81200, pt: -83.8 },
+  { name: '玄武湖冲浪手', games: 4, first: 0, second: 1, third: 1, fourth: 2, bifei: 1, total: 60400, pt: -89.6 },
+  { name: '朱哥', games: 7, first: 1, second: 1, third: 1, fourth: 4, bifei: 2, total: 109200, pt: -125.8 },
+  { name: 'fishone', games: 9, first: 0, second: 1, third: 2, fourth: 6, bifei: 2, total: 97700, pt: -267.3 },
+];
 
-    const winRate = Math.max(10, 35 - (i * 1.5) + (Math.random() * 5));
-    const dealInRate = Math.min(25, 10 + (i * 0.8) + (Math.random() * 3));
-
-    const trend: 'up' | 'down' | 'stable' = Math.random() > 0.7 ? 'up' : Math.random() > 0.4 ? 'down' : 'stable';
-    
-    const top4Rates: [number, number, number, number] = [
-        Math.floor(Math.random() * 10), 
-        Math.floor(Math.random() * 10), 
-        Math.floor(Math.random() * 10), 
-        Math.floor(Math.random() * 5)
-    ];
-
-    const teamName = isTeam ? TEAM_NAMES[i % TEAM_NAMES.length] : undefined;
-
+function toCompetitors(rows: Raw[]): Competitor[] {
+  const list = rows.map((r, i) => {
+    const avgOrder = Number(((r.first + 2 * r.second + 3 * r.third + 4 * r.fourth) / r.games).toFixed(2));
+    const winRate = Number(((r.first / r.games) * 100).toFixed(1));
+    const dealInRate = Number(((r.fourth / r.games) * 100).toFixed(1));
     return {
-      id: `comp-${isTeam ? 'team' : 'ind'}-${i}`,
-      rank,
-      name: isTeam ? teamName! : `选手_${String.fromCharCode(65 + i)}${Math.floor(Math.random() * 99)}`,
-      teamName: isTeam ? undefined : TEAM_NAMES[Math.floor(Math.random() * TEAM_NAMES.length)],
-      members: isTeam ? generateMembers(teamName!) : undefined,
-      totalScore: Number(score.toFixed(1)),
+      id: `comp-ind-${i}`,
+      rank: i + 1,
+      name: r.name,
+      teamName: '大学城',
+      totalScore: r.total,
+      totalPT: Number(r.pt.toFixed(1)),
       avgOrder,
-      winRate: Number(winRate.toFixed(1)),
-      dealInRate: Number(dealInRate.toFixed(1)),
-      gamesPlayed: Math.floor(Math.random() * 20) + 5,
-      trend,
-      top4Rates
+      winRate,
+      dealInRate,
+      gamesPlayed: r.games,
+      trend: 'stable' as const,
+      top4Rates: [r.first, r.second, r.third, r.fourth],
     };
-  }).sort((a, b) => b.totalScore - a.totalScore).map((c, i) => ({ ...c, rank: i + 1 }));
-};
+  });
+  return list
+    .sort((a, b) => b.totalPT - a.totalPT)
+    .map((c, idx) => ({
+      ...c,
+      rank: idx + 1,
+      top4Rates: [c.top4Rates[0], c.top4Rates[1], c.top4Rates[2], c.top4Rates[3]] as [number, number, number, number],
+    }));
+}
 
-// We will just regenerate this on load. In a real app this is API data.
 export const MOCK_DATA: RankData = {
   weekly: {
-    individual: generateCompetitors(15, false),
-    team: generateCompetitors(5, true),
+    individual: toCompetitors(RAW),
+    team: [],
   },
   monthly: {
-    individual: generateCompetitors(15, false),
-    team: generateCompetitors(5, true),
+    individual: [],
+    team: [],
   },
 };
+
+function key(month: string, week: number | 'Monthly', arena: Arena, category: RankCategory) {
+  return `${month}|${week}|${arena}|${category}`;
+}
+
+const DATASETS: Record<string, Competitor[]> = {
+  [key('2025年12月', 2, 'Arena A', 'individual')]: toCompetitors(RAW),
+};
+
+export function getRankData(month: string, week: number | 'Monthly', arena: Arena, category: RankCategory): Competitor[] {
+  return DATASETS[key(month, week, arena, category)] ?? [];
+}

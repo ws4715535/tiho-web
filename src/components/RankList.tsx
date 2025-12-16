@@ -2,31 +2,20 @@ import { useState, useMemo } from 'react';
 import { FilterBar } from '../components/FilterBar';
 import { RankCard } from '../components/RankCard';
 import { DetailModal } from '../components/DetailModal';
-import { MOCK_DATA } from '../services/data';
+import { getRankData } from '../services/data';
 import { Competitor, RankCategory, Arena } from '../types';
 
 export const RankList = () => {
   // App State moved here
   const [category, setCategory] = useState<RankCategory>('individual');
   const [arena, setArena] = useState<Arena>('Arena A');
-  const [month, setMonth] = useState<string>('2024年3月');
-  const [week, setWeek] = useState<number | 'Monthly'>(3);
+  const [month, setMonth] = useState<string>('2025年12月');
+  const [week, setWeek] = useState<number | 'Monthly'>(2);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompetitor, setSelectedCompetitor] = useState<Competitor | null>(null);
 
   const filteredData = useMemo(() => {
-    // Determine data source (weekly vs monthly mock bucket)
-    const periodKey = week === 'Monthly' ? 'monthly' : 'weekly';
-    
-    let list = [...MOCK_DATA[periodKey][category]];
-    
-    // Simulate "Filtering" by Arena (Just for visual effect in this mock)
-    if (arena === 'Arena B') {
-        list = list.reverse().map((item, index) => ({
-            ...item, 
-            rank: index + 1 // Re-rank after shuffle
-        }));
-    }
+    let list = getRankData(month, week, arena, category);
 
     if (searchTerm.trim()) {
       const lower = searchTerm.toLowerCase();
@@ -47,7 +36,7 @@ export const RankList = () => {
                   积分榜
               </h2>
               <span className="text-indigo-600 dark:text-indigo-400 text-sm font-mono font-bold tracking-tight">
-                  2024 赛季
+                  2025 赛季
               </span>
          </div>
          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -76,7 +65,7 @@ export const RankList = () => {
           ))
         ) : (
           <div className="text-center py-12 text-slate-500">
-            <p>未找到匹配内容 "{searchTerm}"</p>
+            <p>暂无比赛数据～"</p>
           </div>
         )}
       </div>

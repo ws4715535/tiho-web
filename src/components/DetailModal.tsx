@@ -23,6 +23,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
       'stable': '持平'
   };
 
+
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
@@ -65,8 +66,14 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
             <div className="flex justify-between items-center p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                 <div>
                     <span className="text-xs text-slate-500 uppercase tracking-widest">总积分</span>
-                    <div className={cn("text-4xl font-mono font-bold", data.totalScore > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400')}>
-                        {data.totalScore > 0 ? '+' : ''}{data.totalScore}
+                    <div className="text-4xl font-mono font-bold text-slate-900 dark:text-white">
+                        {data.totalScore}
+                    </div>
+                    <div className="mt-2">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-widest">总PT</span>
+                      <div className={cn("text-2xl font-mono font-bold", data.totalPT > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400')}>
+                        {data.totalPT > 0 ? '+' : ''}{data.totalPT}
+                      </div>
                     </div>
                 </div>
                 <div className="text-right">
@@ -82,7 +89,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
                 <div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700/50">
                     <div className="flex items-center space-x-2 mb-2 text-yellow-600 dark:text-yellow-400">
                         <Trophy className="w-4 h-4" />
-                        <span className="text-xs font-bold uppercase">和牌率</span>
+                        <span className="text-xs font-bold uppercase">一位率</span>
                     </div>
                     <div className="text-xl font-mono text-slate-900 dark:text-white">{data.winRate}%</div>
                     <div className="w-full bg-slate-200 dark:bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
@@ -91,14 +98,23 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
                 </div>
 
                 <div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700/50">
-                    <div className="flex items-center space-x-2 mb-2 text-rose-500 dark:text-rose-400">
+                    <div className="flex items-center space-x-2 mb-2 text-indigo-600 dark:text-indigo-400">
                         <AlertTriangle className="w-4 h-4" />
-                        <span className="text-xs font-bold uppercase">放铳率</span>
+                        <span className="text-xs font-bold uppercase">连对率</span>
                     </div>
-                    <div className="text-xl font-mono text-slate-900 dark:text-white">{data.dealInRate}%</div>
-                    <div className="w-full bg-slate-200 dark:bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
-                        <div className="bg-rose-500 dark:bg-rose-400 h-full" style={{ width: `${data.dealInRate}%` }} />
-                    </div>
+                    {(() => {
+                      const first = data.top4Rates[0] || 0;
+                      const games = Math.max(1, data.gamesPlayed);
+                      const streakRate = Number((((first > 1 ? first - 1 : 0) / games) * 100).toFixed(1));
+                      return (
+                        <>
+                          <div className="text-xl font-mono text-slate-900 dark:text-white">{streakRate}%</div>
+                          <div className="w-full bg-slate-200 dark:bg-slate-700 h-1 mt-2 rounded-full overflow-hidden">
+                            <div className="bg-indigo-500 dark:bg-indigo-400 h-full" style={{ width: `${streakRate}%` }} />
+                          </div>
+                        </>
+                      );
+                    })()}
                 </div>
 
                 <div className="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700/50">
@@ -127,6 +143,28 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
                     <div style={{ flex: data.top4Rates[2] || 1 }} className="bg-amber-600 text-white">三位</div>
                     <div style={{ flex: data.top4Rates[3] || 1 }} className="bg-slate-700 text-white">四位</div>
                 </div>
+            </div>
+
+            {/* Fixed Place Counts Bottom */}
+            <div className="px-6 pb-8">
+              <div className="mt-2 grid grid-cols-4 gap-2">
+                <div className="text-center">
+                  <div className="text-[10px] text-slate-500">一位</div>
+                  <div className="text-sm font-mono font-bold text-yellow-600 dark:text-yellow-400">{data.top4Rates[0]}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-[10px] text-slate-500">二位</div>
+                  <div className="text-sm font-mono font-bold text-slate-600 dark:text-slate-300">{data.top4Rates[1]}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-[10px] text-slate-500">三位</div>
+                  <div className="text-sm font-mono font-bold text-amber-600 dark:text-amber-400">{data.top4Rates[2]}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-[10px] text-slate-500">四位</div>
+                  <div className="text-sm font-mono font-bold text-slate-700 dark:text-slate-200">{data.top4Rates[3]}</div>
+                </div>
+              </div>
             </div>
 
             {/* Roster (Team Only) */}

@@ -23,10 +23,17 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
      return 'bg-white dark:bg-slate-800/80 border-l-4 border-transparent shadow-sm hover:shadow-md transition-all dark:hover:bg-slate-800';
   };
 
+  const getNameClass = (rank: number) => {
+    if (rank === 1) return 'font-extrabold text-base sm:text-lg tracking-tight medal-1';
+    if (rank === 2) return 'font-extrabold text-base sm:text-lg tracking-tight medal-2';
+    if (rank === 3) return 'font-extrabold text-base sm:text-lg tracking-tight medal-3';
+    return 'font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg';
+  };
+
   return (
     <div 
       onClick={onClick}
-      className={`relative group mb-3 rounded-r-lg rounded-l-md p-3 sm:p-4 cursor-pointer select-none overflow-hidden transition-all ${getBgStyle(data.rank)}`}
+      className={`relative group mb-3 rounded-r-lg rounded-l-md p-3 sm:p-4 cursor-pointer select-none overflow-hidden transition-all slide-in-up ${getBgStyle(data.rank)} glow-card`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3 sm:space-x-4">
@@ -38,13 +45,15 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
             {/* Info */}
             <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
-                    <span className="font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg">{data.name}</span>
+                    <span className={getNameClass(data.rank)}>{data.name}</span>
                     {data.rank <= 3 && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-500 text-indigo-700 dark:text-white uppercase tracking-wider">前三</span>
                     )}
                 </div>
                 {!isTeam && (
-                     <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{data.teamName}</span>
+                     <span className="inline-flex items-center justify-center whitespace-nowrap w-fit leading-none text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-700">
+                       总分: {data.totalScore}
+                     </span>
                 )}
                 {isTeam && data.members && (
                     <div className="flex items-center mt-1 space-x-1">
@@ -61,8 +70,8 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
         {/* Stats Right */}
         <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="text-right">
-                <div className={`text-lg font-mono font-bold tracking-tight ${data.totalScore > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                    {data.totalScore > 0 ? '+' : ''}{data.totalScore}
+                <div className={`text-lg font-mono font-bold tracking-tight ${data.totalPT > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
+                    {data.totalPT > 0 ? '+' : ''}{data.totalPT}
                 </div>
                 <div className="flex items-center justify-end space-x-2 text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                     <span>均顺: <span className="text-slate-600 dark:text-slate-200 font-bold">{data.avgOrder}</span></span>
@@ -75,7 +84,7 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
       {/* Mini Bar Visual for Win Rate (Decorative) */}
       <div className="absolute bottom-0 left-0 h-0.5 bg-slate-100 dark:bg-slate-700 w-full mt-2 opacity-80">
         <div 
-            className="h-full bg-indigo-500" 
+            className="h-full bg-indigo-500 progress-anim" 
             style={{ width: `${data.winRate}%` }}
         />
       </div>

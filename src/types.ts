@@ -16,6 +16,7 @@ export interface Competitor {
   avatar?: string;
   members?: Member[];
   totalScore: number;
+  totalPT: number;
   avgOrder: number;
   winRate: number;
   dealInRate: number;

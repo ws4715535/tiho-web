@@ -31,10 +31,10 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
         <div className="flex items-center space-x-2">
           <img src={tihoLogo} alt="Riichi.Pro" className="h-10" />
           <div>
-            <h1 className="text-lg font-extrabold tracking-tighter text-slate-900 dark:text-white italic uppercase leading-none transition-colors">
+            <h1 className="text-lg font-extrabold tracking-tighter text-slate-900 dark:text-white italic uppercase leading-none transition-colors brand-neon">
               TIHO Riichi<span className="text-indigo-600 dark:text-indigo-400">.Pro</span>
             </h1>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono tracking-widest uppercase transition-colors">天和雀庄-联赛数据</p>
+            <p className="text-[10px] font-mono tracking-widest uppercase gradient-text">天和雀庄-联赛数据</p>
           </div>
         </div>
         
