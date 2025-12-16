@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Inbox } from 'lucide-react';
 import { FilterBar } from '../components/FilterBar';
 import { RankCard } from '../components/RankCard';
 import { DetailModal } from '../components/DetailModal';
@@ -64,8 +65,9 @@ export const RankList = () => {
             />
           ))
         ) : (
-          <div className="text-center py-12 text-slate-500">
-            <p>暂无比赛数据～"</p>
+          <div className="text-center py-12 text-slate-500 dark:text-slate-400">
+            <Inbox className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">当前筛选条件下暂无比赛数据</p>
           </div>
         )}
       </div>

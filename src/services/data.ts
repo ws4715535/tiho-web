@@ -144,3 +144,12 @@ export function getRankData(month: string, week: number | 'Monthly', arena: Aren
   }
   return DATASETS[key(month, week, arena, category)] ?? [];
 }
+
+export function getAvailableMonths(): string[] {
+  const months = new Set<string>();
+  Object.keys(RAWSETS).forEach(k => {
+    const m = k.split('|')[0];
+    months.add(m);
+  });
+  return Array.from(months).sort((a, b) => a.localeCompare(b));
+}

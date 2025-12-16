@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
             <h1 className="text-lg font-extrabold tracking-tighter text-slate-900 dark:text-white italic uppercase leading-none transition-colors brand-neon">
               TIHO Riichi<span className="text-indigo-600 dark:text-indigo-400">.Pro</span>
             </h1>
-            <p className="text-[10px] font-mono tracking-widest uppercase gradient-text">天和雀庄-联赛数据</p>
+            <p className="text-[10px] font-mono tracking-widest uppercase gradient-text-run">天和雀庄-联赛数据</p>
           </div>
         </div>
         

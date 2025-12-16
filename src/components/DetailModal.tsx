@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Competitor } from '../types';
 import { X, Trophy, AlertTriangle, Target, Activity, Users, Star, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -27,16 +27,6 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
   };
 
 
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow;
-    const prevTouchAction = (document.body.style as any).touchAction;
-    document.body.style.overflow = 'hidden';
-    (document.body.style as any).touchAction = 'none';
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      (document.body.style as any).touchAction = prevTouchAction || '';
-    };
-  }, []);
 
   const g = Math.max(1, data.gamesPlayed);
   const firstRate = (data.top4Rates[0] / g) * 100;

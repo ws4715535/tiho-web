@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Search, Trophy, Users, MapPin, ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react';
 import { RankCategory, Arena } from '../types';
+// no external month list; manual month stepping via parsing
 import { Button } from './ui/Button';
 import { TabsList, TabsTrigger } from './ui/Tabs';
 import { cn } from '../lib/utils';
@@ -27,12 +28,19 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 }) => {
   const weekContainerRef = useRef<HTMLDivElement>(null);
   
-  // Logic to switch months mock
   const handleMonthChange = (direction: 'prev' | 'next') => {
-      const months = ['2025年12月'];
-      const idx = months.indexOf(month);
-      if (direction === 'prev' && idx > 0) setMonth(months[idx - 1]);
-      if (direction === 'next' && idx < months.length - 1) setMonth(months[idx + 1]);
+      const m = month.match(/^(\d{4})年(\d{1,2})月$/);
+      if (!m) return;
+      let y = parseInt(m[1], 10);
+      let mm = parseInt(m[2], 10);
+      if (direction === 'prev') {
+        mm -= 1;
+        if (mm < 1) { mm = 12; y -= 1; }
+      } else {
+        mm += 1;
+        if (mm > 12) { mm = 1; y += 1; }
+      }
+      setMonth(`${y}年${mm}月`);
   };
 
   // Logic to scroll selected week into view

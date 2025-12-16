@@ -42,7 +42,7 @@ body {
 }
 
 .brand-neon {
-  animation: neonPulse 2.8s ease-in-out infinite;
+  animation: neonPulse 1.6s ease-in-out infinite;
 }
 .gradient-text {
   background: linear-gradient(90deg, #6366f1, #22d3ee, #ff00ff, #6366f1);
@@ -51,6 +51,14 @@ body {
   background-clip: text;
   color: transparent;
   animation: gradientShift 10s linear infinite;
+}
+.gradient-text-run {
+  background: linear-gradient(90deg, #6366f1, #22d3ee, #ff00ff, #6366f1);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientShift 5s linear infinite, slideInOut 1s ease-in-out infinite;
 }
 .float-slow {
   animation: float 6s ease-in-out infinite;
@@ -133,6 +141,12 @@ body {
 @keyframes slideInUp {
   0% { opacity: 0; transform: translateY(8px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInOut {
+  0% { opacity: 0; transform: translateX(-12px); }
+  10% { opacity: 1; transform: translateX(0); }
+  90% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(12px); }
 }
 
 /* Glass Panel Component */
