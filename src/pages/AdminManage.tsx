@@ -5,6 +5,7 @@ import { fetchRawRankData, deleteRankDataItem, updateRankDataItem, RankResponseI
 import { Arena } from '../types';
 import { getWeekDateRange } from '../lib/utils';
 import { Button } from '../components/ui/Button';
+import { AlertDialog } from '../components/ui/AlertDialog';
 
 export const AdminManage = () => {
   const navigate = useNavigate();
@@ -17,6 +18,11 @@ export const AdminManage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Delete Dialog State
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Edit State
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -37,15 +43,25 @@ export const AdminManage = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('确定要删除这条记录吗？此操作不可恢复。')) return;
+  const handleDelete = (id: number) => {
+    setItemToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    
+    setDeleteLoading(true);
     try {
-      await deleteRankDataItem(id);
-      setData(prev => prev.filter(item => item.id !== id));
+      await deleteRankDataItem(itemToDelete);
+      setData(prev => prev.filter(item => item.id !== itemToDelete));
       setSuccess('删除成功');
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
     } catch (err) {
       setError('删除失败');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -113,6 +129,16 @@ export const AdminManage = () => {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <AlertDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title="确认删除"
+          description="确定要删除这条记录吗？此操作不可恢复，请谨慎操作。"
+          onConfirm={confirmDelete}
+          loading={deleteLoading}
+          variant="destructive"
+        />
+
         {/* Filters */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 items-end">
@@ -172,7 +198,10 @@ export const AdminManage = () => {
             </Button>
           </div>
           <p className="text-[10px] text-slate-400 mt-2">
-             {getWeekDateRange(year, month, week)}
+             {week === 'All' 
+                ? `${year}年${month}月 全月数据`
+                : getWeekDateRange(year, month, week)
+             }
           </p>
         </div>
 
