@@ -129,7 +129,11 @@ export const RankList = () => {
         ) : (
           <div className="text-center py-12 text-slate-500 dark:text-slate-400">
             <Inbox className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">当前筛选条件下暂无比赛数据</p>
+            <p className="text-sm">
+              {category === 'team' 
+                ? '双人成行❤️搭档立直赛 即将开启！' 
+                : '当前筛选条件下暂无比赛数据'}
+            </p>
           </div>
         )}
       </div>

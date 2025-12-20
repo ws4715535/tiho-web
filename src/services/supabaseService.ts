@@ -30,7 +30,7 @@ const DB_CONFIG = {
 //   }[];
 // }
 
-interface RankResponseItem {
+export interface RankResponseItem {
   id: number;
   arena: string;
   match_year: number;
@@ -47,6 +47,62 @@ interface RankResponseItem {
   point: number;
   created_at: string;
 }
+
+export const fetchRawRankData = async (
+  year: number,
+  month: number,
+  week: number | 'All',
+  arena: string
+): Promise<RankResponseItem[]> => {
+  try {
+    let query = supabase
+      .from(DB_CONFIG.RANK_TABLE)
+      .select("*")
+      .eq("arena", arena)
+      .eq("match_year", year)
+      .eq("match_month", month);
+
+    if (week !== 'All') {
+      query = query.eq("match_week", week);
+    }
+
+    const { data, error } = await query.order('point', { ascending: false });
+
+    if (error) throw error;
+    return (data as RankResponseItem[]) || [];
+  } catch (error) {
+    console.error("fetchRawRankData error:", error);
+    throw error;
+  }
+};
+
+export const deleteRankDataItem = async (id: number) => {
+  try {
+    const { error } = await supabase
+      .from(DB_CONFIG.RANK_TABLE)
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("deleteRankDataItem error:", error);
+    throw error;
+  }
+};
+
+export const updateRankDataItem = async (id: number, updates: Partial<RankResponseItem>) => {
+  try {
+    const { error } = await supabase
+      .from(DB_CONFIG.RANK_TABLE)
+      .update(updates)
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("updateRankDataItem error:", error);
+    throw error;
+  }
+};
 
 export const uploadRankData = async (
   year: number,

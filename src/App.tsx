@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Header, Theme } from './components/Header';
 import { RankList } from './components/RankList';
 import { AdminUpload } from './pages/AdminUpload';
+import { AdminManage } from './pages/AdminManage';
 
 export default function App() {
   // Theme State (Global UI State)
@@ -30,6 +31,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<RankList />} />
           <Route path="/admin/upload" element={<AdminUpload />} />
+          <Route path="/admin/manage" element={<AdminManage />} />
         </Routes>
       </main>
     </div>
