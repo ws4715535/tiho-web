@@ -4,7 +4,7 @@ import { FilterBar } from '../components/FilterBar';
 import { RankCard } from '../components/RankCard';
 import { DetailModal } from '../components/DetailModal';
 import { fetchRankData } from '../services/supabaseService';
-import { getWeekDateRange } from '../lib/utils';
+import { getWeekDateRange, isWeekInProgress } from '../lib/utils';
 import { Competitor, RankCategory, Arena } from '../types';
 
 export const RankList = () => {
@@ -18,6 +18,29 @@ export const RankList = () => {
 
   const [list, setList] = useState<Competitor[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Auto-select current week based on date
+  useEffect(() => {
+    // Only run once on mount
+    const mm = month.match(/^(\d{4})年(\d{1,2})月$/);
+    if (mm) {
+      const y = parseInt(mm[1]);
+      const m = parseInt(mm[2]);
+      
+      // Check weeks 1-4
+      for (let w = 1; w <= 4; w++) {
+        if (isWeekInProgress(y, m, w)) {
+          setWeek(w);
+          break;
+        }
+      }
+    }
+  }, []); // Empty dependency array to run only on mount (or when month changes if we want auto-switch on month change too, but user might manually select week so be careful)
+  // Actually, if we put [month] here, every time user changes month it will auto-jump to active week OF THAT MONTH if exists.
+  // That might be good behavior. Let's try to limit it to initial load or smarter logic.
+  // Requirement says "Default selected should be in progress week".
+  // Let's do it on initial load only to respect user navigation later.
+
 
   useEffect(() => {
     const parseMonth = (m: string) => {

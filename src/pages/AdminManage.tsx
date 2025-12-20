@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Edit2, Trash2, Save, X, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { fetchRawRankData, deleteRankDataItem, updateRankDataItem, RankResponseItem } from '../services/supabaseService';
