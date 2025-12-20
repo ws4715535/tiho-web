@@ -210,7 +210,7 @@ export const MoMo = () => {
            <p className="text-sm text-slate-500 dark:text-slate-400 font-mono tracking-widest animate-pulse">正在寻找有缘人...</p>
         </div>
       ) : profiles.length > 0 ? (
-        <div className="relative w-full max-w-[320px] aspect-[3/5]">
+        <div className="relative w-full max-w-[320px] aspect-[3/4.5]">
           <AnimatePresence>
             {profiles.map((profile, index) => (
               <Card
@@ -224,29 +224,29 @@ export const MoMo = () => {
           </AnimatePresence>
           
           {/* Controls */}
-          <div className="absolute -bottom-24 left-0 right-0 flex justify-center items-center gap-8 z-10">
-            <div className="flex flex-col items-center gap-2">
+          <div className="absolute -bottom-20 left-0 right-0 flex justify-center items-center gap-6 z-10">
+            <div className="flex flex-col items-center gap-1">
               <button 
-                className="p-4 rounded-full bg-white dark:bg-slate-800 shadow-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:scale-110 transition-all border border-slate-200 dark:border-slate-700"
+                className="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:scale-110 transition-all border border-slate-200 dark:border-slate-700"
                 onClick={() => {
                   if (profiles.length > 0) handleSwipe('left', profiles[profiles.length - 1].id);
                 }}
               >
-                <X className="w-8 h-8" />
+                <X className="w-6 h-6" />
               </button>
-              <span className="text-xs font-bold text-rose-500 uppercase tracking-widest">拉</span>
+              <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest">拉</span>
             </div>
             
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1">
               <button 
-                className="p-4 rounded-full bg-white dark:bg-slate-800 shadow-lg text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:scale-110 transition-all border border-slate-200 dark:border-slate-700"
+                className="p-3 rounded-full bg-white dark:bg-slate-800 shadow-lg text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:scale-110 transition-all border border-slate-200 dark:border-slate-700"
                 onClick={() => {
                    if (profiles.length > 0) handleSwipe('right', profiles[profiles.length - 1].id);
                 }}
               >
-                <Heart className="w-8 h-8 fill-current" />
+                <Heart className="w-6 h-6 fill-current" />
               </button>
-              <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">夯</span>
+              <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">夯</span>
             </div>
           </div>
         </div>
