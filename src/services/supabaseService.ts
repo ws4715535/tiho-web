@@ -46,6 +46,7 @@ export interface RankResponseItem {
   total_score: number;
   point: number;
   created_at: string;
+  max_point?: number;
 }
 
 export const fetchRawRankData = async (
@@ -139,6 +140,30 @@ export const uploadRankData = async (
     return data;
   } catch (error) {
     console.error('Failed to upload rank data:', error);
+    throw error;
+  }
+};
+
+export const fetchRandomRankData = async (
+  year: number,
+  month: number,
+  limit: number = 10
+): Promise<RankResponseItem[]> => {
+  try {
+    const { data, error } = await supabase
+      .from(DB_CONFIG.RANK_TABLE)
+      .select("*")
+      .eq("match_year", year)
+      .eq("match_month", month);
+
+    if (error) throw error;
+    
+    // Randomly select items
+    const items = (data as RankResponseItem[]) || [];
+    const shuffled = items.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, limit);
+  } catch (error) {
+    console.error("fetchRandomRankData error:", error);
     throw error;
   }
 };

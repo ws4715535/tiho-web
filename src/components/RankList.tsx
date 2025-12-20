@@ -11,35 +11,29 @@ export const RankList = () => {
   // App State moved here
   const [category, setCategory] = useState<RankCategory>('individual');
   const [arena, setArena] = useState<Arena>('大学城');
-  const [month, setMonth] = useState<string>('2025年12月');
-  const [week, setWeek] = useState<number | 'Monthly'>(3);
+  const [month, setMonth] = useState<string>(() => {
+    const now = new Date();
+    return `${now.getFullYear()}年${now.getMonth() + 1}月`;
+  });
+  const [week, setWeek] = useState<number | 'Monthly'>(() => {
+    // Auto-select current week based on date
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    
+    // Check weeks 1-4
+    for (let w = 1; w <= 4; w++) {
+      if (isWeekInProgress(y, m, w)) {
+        return w;
+      }
+    }
+    return 3; // Default fallback
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompetitor, setSelectedCompetitor] = useState<Competitor | null>(null);
 
   const [list, setList] = useState<Competitor[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Auto-select current week based on date
-  useEffect(() => {
-    // Only run once on mount
-    const mm = month.match(/^(\d{4})年(\d{1,2})月$/);
-    if (mm) {
-      const y = parseInt(mm[1]);
-      const m = parseInt(mm[2]);
-      
-      // Check weeks 1-4
-      for (let w = 1; w <= 4; w++) {
-        if (isWeekInProgress(y, m, w)) {
-          setWeek(w);
-          break;
-        }
-      }
-    }
-  }, []); // Empty dependency array to run only on mount (or when month changes if we want auto-switch on month change too, but user might manually select week so be careful)
-  // Actually, if we put [month] here, every time user changes month it will auto-jump to active week OF THAT MONTH if exists.
-  // That might be good behavior. Let's try to limit it to initial load or smarter logic.
-  // Requirement says "Default selected should be in progress week".
-  // Let's do it on initial load only to respect user navigation later.
 
 
   useEffect(() => {

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Header, Theme } from './components/Header';
 import { RankList } from './components/RankList';
 import { Home } from './pages/Home';
+import { MoMo } from './pages/MoMo';
 import { AdminUpload } from './pages/AdminUpload';
 import { AdminManage } from './pages/AdminManage';
 
@@ -31,6 +32,8 @@ export default function App() {
       <main className="pt-20 px-4 max-w-2xl mx-auto">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/momo" element={<MoMo />} />
+          <Route path="/match" element={<Navigate to="/momo" replace />} />
           <Route path="/ranking" element={<RankList />} />
           <Route path="/admin/upload" element={<AdminUpload />} />
           <Route path="/admin/manage" element={<AdminManage />} />

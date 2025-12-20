@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Moon, Sun, Cpu, Upload, Lock, Database } from 'lucide-react';
+import { Menu, Moon, Sun, Cpu, Upload, Lock, Database, Heart } from 'lucide-react';
 import { Button } from './ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 
@@ -71,6 +71,14 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
           </div>
           
           <div className="flex items-center space-x-2 relative">
+              <button 
+                  onClick={() => navigate('/match')}
+                  className="group relative p-2 rounded-full text-rose-500 hover:bg-rose-100 dark:text-rose-400 dark:hover:bg-slate-800 transition-all"
+                  title="雀友匹配"
+              >
+                  <div className="absolute inset-0 bg-rose-400/20 rounded-full animate-ping"></div>
+                  <Heart className="h-5 w-5 relative z-10 fill-current" />
+              </button>
               <button 
                   onClick={cycleTheme}
                   className="p-2 rounded-full text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white transition-all"
