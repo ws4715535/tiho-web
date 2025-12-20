@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { Header, Theme } from './components/Header';
 import { RankList } from './components/RankList';
+import { AdminUpload } from './pages/AdminUpload';
 
 export default function App() {
   // Theme State (Global UI State)
@@ -25,7 +27,10 @@ export default function App() {
       
       {/* Main Layout Container */}
       <main className="pt-20 px-4 max-w-2xl mx-auto">
-        <RankList />
+        <Routes>
+          <Route path="/" element={<RankList />} />
+          <Route path="/admin/upload" element={<AdminUpload />} />
+        </Routes>
       </main>
     </div>
   );

@@ -58,14 +58,14 @@ export const FilterBar: React.FC<FilterBarProps> = ({
       
       {/* 1. Arena Switcher using UI Tabs */}
       <TabsList>
-        {(['Arena A', 'Arena B'] as Arena[]).map((a) => (
+        {(['大学城', '李家村'] as Arena[]).map((a) => (
             <TabsTrigger
                 key={a}
                 active={arena === a}
                 onClick={() => setArena(a)}
             >
                 <MapPin className={cn("w-3 h-3 mr-1.5", arena === a ? 'fill-current' : '')} />
-                {a === 'Arena A' ? '大学城' : '李家村'}
+                {a}
             </TabsTrigger>
         ))}
       </TabsList>

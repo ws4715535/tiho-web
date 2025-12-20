@@ -1,6 +1,6 @@
 export type RankPeriod = 'weekly' | 'monthly';
 export type RankCategory = 'individual' | 'team';
-export type Arena = 'Arena A' | 'Arena B';
+export type Arena = '大学城' | '李家村';
 
 export interface Member {
   name: string;

@@ -1,6 +1,6 @@
 import { RankData, Competitor, Arena, RankCategory } from "../types";
 
-type Raw = {
+export type Raw = {
   name: string;
   games: number;
   first: number;
@@ -36,7 +36,35 @@ const RAW_DEC_W2: Raw[] = [
   { name: 'fishone', games: 9, first: 0, second: 1, third: 2, fourth: 6, bifei: 2, total: 97700, pt: -267.3 },
 ];
 
-// 2025年12月 第1周 大学城（Arena A）数据
+const RAW_DEC_W3: Raw[] = [
+  { name: 'あrla', games: 3, first: 3, second: 0, third: 0, fourth: 0, bifei: 0, total: 145500, pt: 160.5 },
+  { name: '私权分析与建构', games: 8, first: 4, second: 2, third: 1, fourth: 1, bifei: 0, total: 230600, pt: 120.6 },
+  { name: '豚豚', games: 20, first: 5, second: 8, third: 4, fourth: 3, bifei: 0, total: 559600, pt: 109.6 },
+  { name: 'placebo', games: 4, first: 2, second: 1, third: 1, fourth: 0, bifei: 0, total: 131000, pt: 81 },
+  { name: '小五郎', games: 23, first: 5, second: 9, third: 4, fourth: 5, bifei: 1, total: 645200, pt: 80.2 },
+  { name: '肖小', games: 11, first: 4, second: 2, third: 2, fourth: 3, bifei: 0, total: 296500, pt: 61.5 },
+  { name: '柳越', games: 3, first: 1, second: 2, third: 0, fourth: 0, bifei: 0, total: 103400, pt: 58.4 },
+  { name: '竹依轻风', games: 5, first: 2, second: 0, third: 3, fourth: 0, bifei: 0, total: 137000, pt: 42 },
+  { name: '月夜繁星', games: 4, first: 1, second: 1, third: 1, fourth: 1, bifei: 0, total: 136700, pt: 36.7 },
+  { name: '猪柳蛋汉堡', games: 9, first: 1, second: 5, third: 3, fourth: 0, bifei: 0, total: 259900, pt: 34.9 },
+  { name: 'Misakaa', games: 10, first: 3, second: 2, third: 2, fourth: 3, bifei: 1, total: 269800, pt: 29.8 },
+  { name: '恶调', games: 5, first: 2, second: 1, third: 1, fourth: 1, bifei: 1, total: 122700, pt: 27.7 },
+  { name: '椰不群', games: 5, first: 2, second: 0, third: 2, fourth: 1, bifei: 0, total: 129900, pt: 24.9 },
+  { name: '小钊子儿', games: 5, first: 2, second: 0, third: 1, fourth: 2, bifei: 1, total: 110000, pt: -5 },
+  { name: 'Orin', games: 2, first: 0, second: 1, third: 1, fourth: 0, bifei: 0, total: 53700, pt: -6.3 },
+  { name: '我是战斗贼', games: 2, first: 0, second: 1, third: 1, fourth: 0, bifei: 0, total: 50100, pt: -9.9 },
+  { name: '沙漠孤狼001', games: 1, first: 0, second: 0, third: 1, fourth: 0, bifei: 0, total: 16500, pt: -18.5 },
+  { name: '且行', games: 4, first: 1, second: 0, third: 2, fourth: 1, bifei: 1, total: 76400, pt: -33.6 },
+  { name: '邮寄碎片', games: 3, first: 0, second: 0, third: 2, fourth: 1, bifei: 0, total: 69500, pt: -45.5 },
+  { name: '云星梦', games: 3, first: 0, second: 0, third: 2, fourth: 1, bifei: 0, total: 47300, pt: -67.7 },
+  { name: '小卡比兽', games: 5, first: 1, second: 0, third: 1, fourth: 3, bifei: 1, total: 81200, pt: -83.8 },
+  { name: 'jackzzzzzzzz', games: 3, first: 0, second: 1, third: 0, fourth: 2, bifei: 0, total: 29300, pt: -85.7 },
+  { name: '玄武湖冲浪手', games: 4, first: 0, second: 1, third: 1, fourth: 2, bifei: 1, total: 60400, pt: -89.6 },
+  { name: '朱哥', games: 7, first: 1, second: 1, third: 1, fourth: 4, bifei: 2, total: 109200, pt: -125.8 },
+  { name: 'fishone', games: 9, first: 0, second: 1, third: 2, fourth: 6, bifei: 2, total: 97700, pt: -267.3 },
+];
+
+// 2025年12月 第2周 大学城（Arena A）数据
 const RAW_DEC_W1: Raw[] = [
   { name: '肖小', games: 18, first: 6, second: 5, third: 5, fourth: 2, bifei: 1, total: 529600, pt: 169.6 },
   { name: '衣锦鲤', games: 6, first: 2, second: 3, third: 1, fourth: 1, bifei: 0, total: 191100, pt: 91.1 },
@@ -83,7 +111,7 @@ function toCompetitors(rows: Raw[]): Competitor[] {
 
 export const MOCK_DATA: RankData = {
   weekly: {
-    individual: toCompetitors(RAW_DEC_W2),
+    individual: toCompetitors(RAW_DEC_W3),
     team: [],
   },
   monthly: {
@@ -96,15 +124,39 @@ function key(month: string, week: number | 'Monthly', arena: Arena, category: Ra
   return `${month}|${week}|${arena}|${category}`;
 }
 
-const DATASETS: Record<string, Competitor[]> = {
-  [key('2025年12月', 2, 'Arena A', 'individual')]: toCompetitors(RAW_DEC_W2),
-  [key('2025年12月', 1, 'Arena A', 'individual')]: toCompetitors(RAW_DEC_W1),
-};
+const STORAGE_PREFIX = 'TIHO_RANK_DATA_';
 
 const RAWSETS: Record<string, Raw[]> = {
-  [key('2025年12月', 2, 'Arena A', 'individual')]: RAW_DEC_W2,
-  [key('2025年12月', 1, 'Arena A', 'individual')]: RAW_DEC_W1,
+  [key('2025年12月', 3, '大学城', 'individual')]: RAW_DEC_W3,
+  [key('2025年12月', 2, '大学城', 'individual')]: RAW_DEC_W2,
+  [key('2025年12月', 1, '大学城', 'individual')]: RAW_DEC_W1,
 };
+
+// Load from LocalStorage
+try {
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith(STORAGE_PREFIX)) {
+      const dataKey = k.replace(STORAGE_PREFIX, '');
+      const rawData = JSON.parse(localStorage.getItem(k) || '[]');
+      if (Array.isArray(rawData)) {
+        RAWSETS[dataKey] = rawData;
+      }
+    }
+  }
+} catch (e) {
+  console.error('Failed to load rank data from localStorage', e);
+}
+
+export function saveRankData(month: string, week: number, arena: Arena, category: RankCategory, data: Raw[]) {
+  const k = key(month, week, arena, category);
+  RAWSETS[k] = data;
+  try {
+    localStorage.setItem(STORAGE_PREFIX + k, JSON.stringify(data));
+  } catch (e) {
+    console.error('Failed to save rank data', e);
+  }
+}
 
 function aggregateMonthlyRaw(month: string, arena: Arena, category: RankCategory): Raw[] {
   const rows: Raw[] = [];
@@ -142,7 +194,11 @@ export function getRankData(month: string, week: number | 'Monthly', arena: Aren
     const raw = aggregateMonthlyRaw(month, arena, category);
     return toCompetitors(raw);
   }
-  return DATASETS[key(month, week, arena, category)] ?? [];
+  const k = key(month, week, arena, category);
+  if (RAWSETS[k]) {
+    return toCompetitors(RAWSETS[k]);
+  }
+  return [];
 }
 
 export function getAvailableMonths(): string[] {
