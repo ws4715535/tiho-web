@@ -259,9 +259,9 @@ export const MoMo = () => {
              </div>
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">今日推荐已阅完</h2>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">您已批完奏折！</h2>
             <p className="text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-              既然这么有缘，不如去看看排行榜上的高手们？
+              不如去看看排行榜上的高手们？
             </p>
           </div>
           <div className="flex gap-4 justify-center">
