@@ -27,6 +27,14 @@ export const RankList = () => {
 
     const load = async () => {
       setLoading(true);
+      
+      // Temporary: Team ranking API is not ready yet.
+      if (category === 'team') {
+        setList([]);
+        setLoading(false);
+        return;
+      }
+
       const parsed = parseMonth(month);
       if (!parsed) {
         setLoading(false);
@@ -50,7 +58,7 @@ export const RankList = () => {
     };
 
     load();
-  }, [arena, month, week]);
+  }, [arena, month, week, category]);
 
   const filteredData = useMemo(() => {
     let listData = list;

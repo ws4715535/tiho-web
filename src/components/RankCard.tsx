@@ -74,6 +74,7 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
                     {data.totalPT > 0 ? '+' : ''}{data.totalPT}
                 </div>
                 <div className="flex items-center justify-end space-x-2 text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    <span>总局: <span className="text-slate-600 dark:text-slate-200 font-bold">{data.gamesPlayed}</span></span>
                     <span>均顺: <span className="text-slate-600 dark:text-slate-200 font-bold">{data.avgOrder}</span></span>
                 </div>
             </div>
