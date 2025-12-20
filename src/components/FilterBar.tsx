@@ -4,7 +4,7 @@ import { RankCategory, Arena } from '../types';
 // no external month list; manual month stepping via parsing
 import { Button } from './ui/Button';
 import { TabsList, TabsTrigger } from './ui/Tabs';
-import { cn } from '../lib/utils';
+import { cn, isWeekInProgress } from '../lib/utils';
 
 interface FilterBarProps {
   category: RankCategory;
@@ -89,10 +89,22 @@ export const FilterBar: React.FC<FilterBarProps> = ({
           {/* Week Scroller */}
           <div 
             ref={weekContainerRef}
-            className="flex space-x-2 overflow-x-auto no-scrollbar pb-1 px-1 snap-x"
+            className="flex space-x-2 overflow-x-auto no-scrollbar pb-1 px-1 pt-5 snap-x"
           >
             {[1, 2, 3, 4, 'Monthly'].map((w) => {
                 const isSelected = week === w; 
+                
+                // Check if this week is currently in progress
+                let isInProgress = false;
+                if (typeof w === 'number') {
+                  const m = month.match(/^(\d{4})年(\d{1,2})月$/);
+                  if (m) {
+                    const year = parseInt(m[1], 10);
+                    const mm = parseInt(m[2], 10);
+                    isInProgress = isWeekInProgress(year, mm, w);
+                  }
+                }
+
                 return (
                     <button
                         key={w}
@@ -100,13 +112,20 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         data-active={isSelected}
                         onClick={() => setWeek(w as number | 'Monthly')}
                         className={cn(
-                            "shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition-all whitespace-nowrap select-none snap-start",
+                            "relative shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition-all whitespace-nowrap select-none snap-start",
                             isSelected
                             ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20"
-                            : "bg-transparent border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                            : "bg-transparent border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-indigo-400 dark:hover:border-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400",
+                            isInProgress && !isSelected && "border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/10"
                         )}
                     >
                         {w === 'Monthly' ? '全月' : `第 ${w} 周`}
+                        {isInProgress && (
+                          <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                          </span>
+                        )}
                     </button>
                 )
             })}

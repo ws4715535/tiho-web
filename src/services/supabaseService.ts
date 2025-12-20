@@ -9,26 +9,26 @@ const viteEnvironment = import.meta.env.VITE_ENVIRONMENT;
 
 const DB_CONFIG = {
   RANK_TABLE: `player_rank_weekly_${viteEnvironment}`,
-  UPDATE_FUNC: `update_ranking_week_${viteEnvironment}`
+  // UPDATE_FUNC: `update_ranking_week_${viteEnvironment}` // Deprecated: Now using direct SQL upsert
 };
 
-interface RankUploadPayload {
-  data: {
-    arena: string;
-    match_year: number;
-    match_month: number;
-    match_week: number;
-    nickname: string;
-    game_count: number;
-    position1: number;
-    position2: number;
-    position3: number;
-    position4: number;
-    busted: number;
-    total_score: number;
-    point: number;
-  }[];
-}
+// interface RankUploadPayload {
+//   data: {
+//     arena: string;
+//     match_year: number;
+//     match_month: number;
+//     match_week: number;
+//     nickname: string;
+//     game_count: number;
+//     position1: number;
+//     position2: number;
+//     position3: number;
+//     position4: number;
+//     busted: number;
+//     total_score: number;
+//     point: number;
+//   }[];
+// }
 
 interface RankResponseItem {
   id: number;
@@ -56,28 +56,28 @@ export const uploadRankData = async (
   records: Raw[]
 ) => {
   // Map Raw data to Payload format
-  const payload: RankUploadPayload = {
-    data: records.map(record => ({
-      arena: arena, // Mapping: 大学城 -> East, 李家村 -> West
-      match_year: year,
-      match_month: month,
-      match_week: week,
-      nickname: record.name,
-      game_count: record.games,
-      position1: record.first,
-      position2: record.second,
-      position3: record.third,
-      position4: record.fourth,
-      busted: record.bifei,
-      total_score: record.total,
-      point: record.pt
-    }))
-  };
+  const upsertData = records.map(record => ({
+    arena: arena, // Mapping: 大学城 -> East, 李家村 -> West
+    match_year: year,
+    match_month: month,
+    match_week: week,
+    nickname: record.name,
+    game_count: record.games,
+    position1: record.first,
+    position2: record.second,
+    position3: record.third,
+    position4: record.fourth,
+    busted: record.bifei,
+    total_score: record.total,
+    point: record.pt
+  }));
 
   try {
-    const { data, error } = await supabase.functions.invoke(DB_CONFIG.UPDATE_FUNC, {
-      body: payload
-    });
+    const { data, error } = await supabase
+      .from(DB_CONFIG.RANK_TABLE)
+      .upsert(upsertData, {
+        onConflict: 'arena,match_year,match_month,match_week,nickname'
+      });
 
     if (error) throw error;
     return data;

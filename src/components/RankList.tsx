@@ -4,6 +4,7 @@ import { FilterBar } from '../components/FilterBar';
 import { RankCard } from '../components/RankCard';
 import { DetailModal } from '../components/DetailModal';
 import { fetchRankData } from '../services/supabaseService';
+import { getWeekDateRange } from '../lib/utils';
 import { Competitor, RankCategory, Arena } from '../types';
 
 export const RankList = () => {
@@ -78,6 +79,18 @@ export const RankList = () => {
          </div>
          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
              当前视图：{arena} • {month} • {week === 'Monthly' ? '全月' : `第 ${week} 周`}
+         </p>
+         <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+             结算规则：每周四截止统计。
+             {week !== 'Monthly' && (() => {
+               const mm = month.match(/^(\d{4})年(\d{1,2})月$/);
+               if (mm) {
+                 const year = parseInt(mm[1]);
+                 const monthNum = parseInt(mm[2]);
+                 return ` 本期时间（北京时间）：${getWeekDateRange(year, monthNum, week as number)}`;
+               }
+               return '';
+             })()}
          </p>
       </div>
 
