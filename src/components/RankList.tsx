@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Inbox } from 'lucide-react';
 import { FilterBar } from '../components/FilterBar';
 import { RankCard } from '../components/RankCard';
 import { DetailModal } from '../components/DetailModal';
-import { getRankData } from '../services/data';
+import { fetchRankData } from '../services/supabaseService';
 import { Competitor, RankCategory, Arena } from '../types';
 
 export const RankList = () => {
@@ -15,10 +15,9 @@ export const RankList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompetitor, setSelectedCompetitor] = useState<Competitor | null>(null);
 
-  // const [list, setList] = useState<Competitor[]>([]);
-  // const [loading, setLoading] = useState(false);
+  const [list, setList] = useState<Competitor[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  /*
   useEffect(() => {
     const parseMonth = (m: string) => {
       const mm = m.match(/^(\d{4})年(\d{1,2})月$/);
@@ -28,20 +27,19 @@ export const RankList = () => {
     const load = async () => {
       setLoading(true);
       const parsed = parseMonth(month);
-      if (!parsed) return;
+      if (!parsed) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const storeId = arena === 'Arena A' ? STORES.UNIVERSITY_TOWN : STORES.LIJIACUN;
-        
-        const competitors = await externalRankService.fetchRank(
+        const competitors = await fetchRankData(
           parsed.year,
           parsed.month,
           week,
-          storeId
+          arena
         );
-        
         setList(competitors);
-
       } catch (err) {
         console.error('Failed to fetch rank data:', err);
         setList([]);
@@ -51,12 +49,10 @@ export const RankList = () => {
     };
 
     load();
-  }, [category, arena, month, week]);
-  */
+  }, [arena, month, week]);
 
   const filteredData = useMemo(() => {
-    // Temporary use hardcoded data
-    let listData = getRankData(month, week, arena, category);
+    let listData = list;
 
     if (searchTerm.trim()) {
       const lower = searchTerm.toLowerCase();
@@ -67,7 +63,7 @@ export const RankList = () => {
     }
     
     return listData;
-  }, [searchTerm, arena, month, week, category]);
+  }, [list, searchTerm]);
 
   return (
     <>
@@ -95,29 +91,12 @@ export const RankList = () => {
 
       {/* List */}
       <div className="space-y-1 animate-in fade-in duration-500">
-        {/*
         {loading ? (
           <div className="text-center py-12 text-slate-500 dark:text-slate-400">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p className="text-sm">加载中...</p>
           </div>
         ) : filteredData.length > 0 ? (
-          filteredData.map((item) => (
-            <RankCard 
-              key={item.id} 
-              data={item} 
-              onClick={() => setSelectedCompetitor(item)}
-              isTeam={category === 'team'}
-            />
-          ))
-        ) : (
-          <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-            <Inbox className="w-8 h-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">当前筛选条件下暂无比赛数据</p>
-          </div>
-        )}
-        */}
-        {filteredData.length > 0 ? (
           filteredData.map((item) => (
             <RankCard 
               key={item.id} 
