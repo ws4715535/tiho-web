@@ -124,7 +124,7 @@ export const AdminUpload = () => {
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/ranking')}
             className="p-2 mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />

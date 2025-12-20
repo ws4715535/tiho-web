@@ -115,7 +115,7 @@ export const AdminManage = () => {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/ranking')}
                 className="p-2 mr-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
                 <ArrowLeft className="h-5 w-5" />
