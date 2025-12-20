@@ -4,6 +4,7 @@ import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle, Loader2 } from '
 import { saveRankData, Raw } from '../services/data';
 import { uploadRankData } from '../services/supabaseService';
 import { Arena } from '../types';
+import { getWeekDateRange } from '../lib/utils';
 
 export const AdminUpload = () => {
   const navigate = useNavigate();
@@ -168,10 +169,15 @@ export const AdminUpload = () => {
                 onChange={(e) => setWeek(parseInt(e.target.value))}
                 className="w-full rounded-lg border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white p-2.5"
               >
-                {[1, 2, 3, 4, 5].map(w => (
+                {[1, 2, 3, 4].map(w => (
                   <option key={w} value={w}>第 {w} 周</option>
                 ))}
               </select>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 pl-1">
+                {getWeekDateRange(year, month, week).replace(/\//g, '年').replace(/- (\d{4})/, '- $1')
+                  .replace(/(\d{4})年(\d{2})年(\d{2})/, '$1年$2月$3日')
+                  .replace(/ - (\d{4})年(\d{2})年(\d{2})/, ' - $1年$2月$3日')}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">赛区</label>
