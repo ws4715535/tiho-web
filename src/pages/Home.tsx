@@ -1,10 +1,17 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
+import { preloadMoMoData } from '../services/momoService';
 
 export const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Preload MoMo data when Home mounts
+    preloadMoMoData();
+  }, []);
 
   return (
     <div className="space-y-12 py-8 animate-in fade-in duration-500">

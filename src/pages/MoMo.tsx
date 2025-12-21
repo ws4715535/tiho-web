@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { X, Heart, RefreshCw, Trophy, Star, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { fetchRandomRankData, RankResponseItem } from '../services/supabaseService';
+import { getMoMoProfiles } from '../services/momoService';
+import { Competitor } from '../types';
 import { Button } from '../components/ui/Button';
 import { AVATAR_URLS } from '../constants/avatarUrls';
 
@@ -20,40 +21,25 @@ interface Profile {
   avgOrder: number;
   avgPoint: number;
   bustedRate: number;
+  arena: string;
 }
 
 // Helper to transform API data to Profile
-const transformDataToProfiles = (data: RankResponseItem[]): Profile[] => {
+const transformDataToProfiles = (data: Competitor[]): Profile[] => {
   return data.map((item, index) => {
-    const winRate = item.game_count > 0 
-      ? parseFloat(((item.position1 / item.game_count) * 100).toFixed(1)) 
-      : 0;
-    
-    const avgOrder = item.game_count > 0 
-      ? parseFloat(((item.position1 * 1 + item.position2 * 2 + item.position3 * 3 + item.position4 * 4) / item.game_count).toFixed(2)) 
-      : 0;
-
-    const avgPoint = item.game_count > 0 
-      ? parseFloat(((item.total_score) / item.game_count).toFixed(0)) 
-      : 0;
-
-    const bustedRate = item.game_count > 0 
-      ? parseFloat(((item.busted / item.game_count) * 100).toFixed(1)) 
-      : 0;
-
     // Determine Rank based on points (rough estimation)
     let rank = 'B';
-    if (item.point > 100) rank = 'SS';
-    else if (item.point > 50) rank = 'S';
-    else if (item.point > 20) rank = 'A+';
-    else if (item.point > 0) rank = 'A';
+    if (item.totalPT > 100) rank = 'SS';
+    else if (item.totalPT > 50) rank = 'S';
+    else if (item.totalPT > 20) rank = 'A+';
+    else if (item.totalPT > 0) rank = 'A';
 
     // Determine Style based on stats
     let style = '平衡流';
-    if (winRate > 30) style = '进攻型';
-    else if (item.busted === 0 && item.game_count > 5) style = '铁壁流';
-    else if (item.position4 / item.game_count < 0.2) style = '防守型';
-    else if (item.position1 > item.position2 && item.position1 > item.position3) style = '运势流';
+    if (item.winRate > 30) style = '进攻型';
+    else if (item.dealInRate === 0 && item.gamesPlayed > 5) style = '铁壁流';
+    else if (item.dealInRate < 10) style = '防守型';
+    else if (item.top4Rates[0] > item.top4Rates[1] && item.top4Rates[0] > item.top4Rates[2]) style = '运势流';
 
     // Generate color based on ID or Name hash
     const colors = [
@@ -68,14 +54,14 @@ const transformDataToProfiles = (data: RankResponseItem[]): Profile[] => {
       'from-cyan-600 to-blue-700',
       'from-indigo-600 to-violet-600'
     ];
-    const colorIndex = (item.id || index) % colors.length;
+    const colorIndex = index % colors.length;
 
     // Mock tags and desc for now, or derive
     const possibleTags = ['进攻型', '防守铁壁', '运势流', '读牌', '速攻', '门清', '染手', '绝境反击', '数据流', '役满'];
     const rawTags = [
       style, 
-      possibleTags[(item.id + 1) % possibleTags.length],
-      possibleTags[(item.id + 2) % possibleTags.length]
+      possibleTags[(index + 1) % possibleTags.length],
+      possibleTags[(index + 2) % possibleTags.length]
     ];
     // Deduplicate tags to avoid key collision
     const tags = Array.from(new Set(rawTags));
@@ -92,26 +78,32 @@ const transformDataToProfiles = (data: RankResponseItem[]): Profile[] => {
       '只要我不点炮，我就不会输。',
       '朴实无华，且枯燥。'
     ];
-    const desc = descs[(item.id) % descs.length] || '享受每一局对局。';
+    const desc = descs[index % descs.length] || '享受每一局对局。';
 
     // Assign random avatar from the list based on ID
     // Prioritize avatar from API if available
-    const avatarUrl = item.avatar_url || AVATAR_URLS[(item.id || index) % AVATAR_URLS.length];
+    // Use ID hash for deterministic random avatar if no API avatar
+    const idHash = item.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const avatarUrl = item.avatar || AVATAR_URLS[idHash % AVATAR_URLS.length];
+
+    // Assuming ID is string like "ext-123" or "sb-123", we need a numeric ID for some logic
+    const numericId = parseInt(item.id.split('-')[1]) || index;
 
     return {
-      id: item.id,
-      name: item.nickname,
-      avatarStr: item.nickname.charAt(0),
+      id: numericId,
+      name: item.name,
+      avatarStr: item.name.charAt(0),
       avatarUrl,
       tags,
       desc,
       rank,
       style,
       color: colors[colorIndex],
-      winRate,
-      avgOrder,
-      avgPoint,
-      bustedRate
+      winRate: item.winRate,
+      avgOrder: item.avgOrder,
+      avgPoint: Math.round(item.totalScore / item.gamesPlayed), // Round to integer
+      bustedRate: item.dealInRate, // Using dealInRate as bustedRate proxy or mapping correctly if available
+      arena: item.teamName || '未知赛区'
     };
   });
 };
@@ -131,11 +123,7 @@ export const MoMo = () => {
     
     setLoading(true);
     try {
-      // Hardcode current month for now, or use date utils
-      const now = new Date();
-      const rawData = await fetchRandomRankData(now.getFullYear(), 12, 10); // Using Dec 2025 as per app context, or use dynamic
-      // Actually app context seems to use 2025-12. Let's use 2025, 12 as default or current.
-      // Let's stick to 2025, 12 for demo consistency with RankList.
+      const rawData = await getMoMoProfiles(20);
       if (rawData.length > 0) {
         setProfiles(transformDataToProfiles(rawData));
       } else {
@@ -166,15 +154,10 @@ export const MoMo = () => {
   };
 
   const reset = () => {
-    // Reset initialized so we can load again if needed, or just call loadProfiles directly (which we do).
-    // Actually loadProfiles checks initialized.current && profiles.length > 0.
-    // So we should probably bypass that check or reset initialized.
-    // But better to just set profiles to empty and call fetch logic directly.
     setProfiles([]);
     setLoading(true);
     // Force reload logic
-    const now = new Date();
-    fetchRandomRankData(now.getFullYear(), 12, 10).then(rawData => {
+    getMoMoProfiles(20).then(rawData => {
         if (rawData.length > 0) {
             setProfiles(transformDataToProfiles(rawData));
         } else {
@@ -363,8 +346,9 @@ const Card: React.FC<CardProps> = ({ profile, onSwipe, isTop, exitDirections }) 
                   <span className="text-5xl font-black text-white">{profile.avatarStr}</span>
                 )}
              </div>
-             <div className="absolute top-4 right-4 px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white font-mono font-bold text-xs">
-                RANK {profile.rank}
+             <div className="absolute top-4 right-4 px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30 text-white font-mono font-bold text-xs flex items-center gap-2">
+                <span className="bg-indigo-500/80 px-1.5 rounded text-[10px]">{profile.arena}</span>
+                <span>RANK {profile.rank}</span>
              </div>
           </div>
 
