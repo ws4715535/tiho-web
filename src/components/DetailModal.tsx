@@ -75,12 +75,27 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
                 <Trophy className="w-32 h-32 text-slate-900 dark:text-white" />
             </div>
 
-            <div className="relative z-10 pr-10">
-                <div className="inline-block px-2 py-1 mb-2 bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 rounded text-[10px] text-indigo-700 dark:text-indigo-300 font-bold uppercase tracking-widest">
-                    当前排名 #{data.rank}
+            <div className="relative z-10 flex items-start space-x-4">
+                <div className="relative flex-shrink-0">
+                    {data.avatar ? (
+                        <img src={data.avatar} alt="" className="w-[72px] h-[72px] rounded-2xl object-cover border-4 border-white/20 dark:border-slate-800/20 shadow-lg" />
+                    ) : (
+                        <div className="w-[72px] h-[72px] rounded-2xl bg-indigo-100 dark:bg-slate-700 flex items-center justify-center text-xl font-bold text-indigo-500 dark:text-slate-400 border-4 border-white/20 dark:border-slate-800/20 shadow-lg">
+                            {data.name.charAt(0)}
+                        </div>
+                    )}
                 </div>
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1">{data.name}</h2>
-                <p className="text-slate-500 dark:text-slate-400 font-medium">{data.teamName || '独立选手'}</p>
+                <div className="flex-1 pr-8 h-[72px] flex flex-col justify-between">
+                    <div className="flex items-center space-x-2">
+                        <div className="inline-block px-2 py-1 bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 rounded text-[10px] text-indigo-700 dark:text-indigo-300 font-bold uppercase tracking-widest">
+                            当前排名 #{data.rank}
+                        </div>
+                        <div className="inline-block px-2 py-1 bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 rounded text-[10px] text-indigo-700 dark:text-indigo-300 font-bold uppercase tracking-widest">
+                            {data.teamName || '独立选手'}
+                        </div>
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">{data.name}</h2>
+                </div>
             </div>
         </div>
 
