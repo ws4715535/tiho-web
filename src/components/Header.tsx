@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Moon, Sun, Cpu, Upload, Lock, Database, Heart } from 'lucide-react';
+import { Moon, Sun, Cpu, Upload, Lock, Database, Heart } from 'lucide-react';
 import { Button } from './ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 
@@ -86,12 +86,12 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
               >
                   {getThemeIcon()}
               </button>
-              <button 
+              {/* <button 
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="p-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition-colors"
+                  className="invisible p-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition-colors"
               >
-                  <Menu className="invisible h-6 w-6" />
-              </button>
+                  <Menu className="h-6 w-6" />
+              </button> */}
 
               {/* Dropdown Menu */}
               {isMenuOpen && (
