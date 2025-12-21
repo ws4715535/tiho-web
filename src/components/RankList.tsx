@@ -58,23 +58,38 @@ export const RankList = () => {
         return;
       }
 
+      const controller = new AbortController();
+
       try {
         const competitors = await fetchRankData(
           parsed.year,
           parsed.month,
           week,
-          arena
+          arena,
+          controller.signal
         );
         setList(competitors);
       } catch (err) {
-        console.error('Failed to fetch rank data:', err);
-        setList([]);
+        if ((err as Error).name === 'AbortError') {
+          console.log('Request cancelled');
+        } else {
+          console.error('Failed to fetch rank data:', err);
+          setList([]);
+        }
       } finally {
-        setLoading(false);
+        // Only turn off loading if not aborted (though aborted usually throws, but just in case)
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
+      
+      return () => controller.abort();
     };
 
-    load();
+    const cleanup = load();
+    return () => {
+      cleanup.then(abort => abort && abort());
+    };
   }, [arena, month, week, category]);
 
   const filteredData = useMemo(() => {

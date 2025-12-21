@@ -154,8 +154,35 @@ export const fetchRandomRankData = async (
   }
 };
 
-export const fetchExternalRankData = async (dateRange: string, storeId: string = "127", limit: number = 200) => {
+// Simple Memory Cache
+const RANK_DATA_CACHE = new Map<string, { timestamp: number; data: any }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export const fetchExternalRankData = async (
+  dateRange: string, 
+  storeId: string = "127", 
+  limit: number = 200,
+  signal?: AbortSignal
+) => {
+  const cacheKey = `${dateRange}-${storeId}-${limit}`;
+  
+  // Check Cache
+  const cached = RANK_DATA_CACHE.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log(`[Cache Hit] fetchExternalRankData: ${cacheKey}`);
+    return cached.data;
+  }
+
   try {
+    // Note: Supabase functions.invoke currently doesn't officially document 'signal' support in all versions,
+    // but we can try to pass it via options if supported, or just let the fetch run and ignore result in component.
+    // However, for pure fetch replacement, we can just do the fetch manually if we had the URL.
+    // For now, let's proceed with invoke.
+    
+    // If using direct fetch to an edge function URL (if public), we could pass signal.
+    // Since we use client.functions.invoke, we rely on it.
+    
+    console.log(`[Network Fetch] fetchExternalRankData: ${cacheKey}`);
     const { data, error } = await supabase.functions.invoke('hook_session', {
       body: {
         date: dateRange,
@@ -163,12 +190,28 @@ export const fetchExternalRankData = async (dateRange: string, storeId: string =
         limit: limit,
         page: "1"
       }
+      // headers: ...
+      // method: 'POST'
     });
 
     if (error) throw error;
+    
+    // Check if aborted before caching/returning (if signal was passed and we could check it)
+    if (signal?.aborted) {
+      throw new DOMException('Aborted', 'AbortError');
+    }
+
     console.log("查询成功:", data);
+    
+    // Set Cache
+    RANK_DATA_CACHE.set(cacheKey, { timestamp: Date.now(), data });
+    
     return data;
   } catch (error) {
+    if (signal?.aborted || (error as any).name === 'AbortError') {
+      console.log('Fetch aborted');
+      throw error;
+    }
     console.error("fetchExternalRankData error:", error);
     throw error;
   }
@@ -269,7 +312,8 @@ export const fetchRankData = async (
   year: number,
   month: number,
   week: number | 'Monthly',
-  arena: string
+  arena: string,
+  signal?: AbortSignal
 ): Promise<Competitor[]> => {
   try {
     // 1. Get Store Config
@@ -294,7 +338,7 @@ export const fetchRankData = async (
 
     // 3. Call External API
     // Note: fetchExternalRankData logs the result, so we don't need to log here again unless error
-    const data = await fetchExternalRankData(dateRange, storeConfig.id, storeConfig.limit);
+    const data = await fetchExternalRankData(dateRange, storeConfig.id, storeConfig.limit, signal);
 
     if (!data || !data.success || !Array.isArray(data.list)) {
       console.warn('External rank data format invalid or empty', data);
