@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
           
           <div className="flex items-center space-x-2 relative">
               <button 
-                  onClick={() => navigate('/match')}
+                  onClick={() => navigate('/momo')}
                   className="group relative p-2 rounded-full text-rose-500 hover:bg-rose-100 dark:text-rose-400 dark:hover:bg-slate-800 transition-all"
                   title="雀友匹配"
               >
@@ -90,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="p-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition-colors"
               >
-                  <Menu className="h-6 w-6" />
+                  <Menu className="invisible h-6 w-6" />
               </button>
 
               {/* Dropdown Menu */}

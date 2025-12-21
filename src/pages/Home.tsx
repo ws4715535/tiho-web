@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity } from 'lucide-react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 import { preloadMoMoData } from '../services/momoService';
@@ -27,7 +27,7 @@ export const Home = () => {
                 TIHO <span className="text-indigo-600 dark:text-indigo-400">CLUB</span>
             </h1>
             <p className="text-sm sm:text-base font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
-                天和雀庄 · 竞技麻雀俱乐部
+                西安天和 · 立直麻雀俱乐部
             </p>
         </div>
 
@@ -92,6 +92,28 @@ export const Home = () => {
 
       {/* Footer / Info */}
       <div className="text-center pt-8 border-t border-slate-200 dark:border-slate-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8 text-left">
+          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-5 h-5 text-indigo-500" />
+              <h3 className="font-bold text-slate-900 dark:text-white">李家村万达店</h3>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              西安市碑林区李家村万达广场2栋1单元1405室
+            </p>
+          </div>
+          
+          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin className="w-5 h-5 text-indigo-500" />
+              <h3 className="font-bold text-slate-900 dark:text-white">长安大学城万科店</h3>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              西安市长安区万科广场D座1430室
+            </p>
+          </div>
+        </div>
+
         <p className="text-xs text-slate-400 dark:text-slate-600 font-mono">
             © 2025 TIHO Riichi Club. All rights reserved.
         </p>
