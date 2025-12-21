@@ -1,6 +1,8 @@
 import { Raw } from './data';
 import supabase from '../lib/supabase/client';
 import { Competitor } from '../types';
+import { getStoreConfig } from '../constants/stores';
+import { getWeekDateRange, calculateWeekRange } from '../lib/utils';
 
 // Configuration for database tables and functions
 // Best practice: Use environment variables to control this (e.g. import.meta.env.VITE_TABLE_PREFIX)
@@ -11,24 +13,6 @@ const DB_CONFIG = {
   RANK_TABLE: `player_rank_weekly_${viteEnvironment}`,
   // UPDATE_FUNC: `update_ranking_week_${viteEnvironment}` // Deprecated: Now using direct SQL upsert
 };
-
-// interface RankUploadPayload {
-//   data: {
-//     arena: string;
-//     match_year: number;
-//     match_month: number;
-//     match_week: number;
-//     nickname: string;
-//     game_count: number;
-//     position1: number;
-//     position2: number;
-//     position3: number;
-//     position4: number;
-//     busted: number;
-//     total_score: number;
-//     point: number;
-//   }[];
-// }
 
 export interface RankResponseItem {
   id: number;
@@ -47,6 +31,7 @@ export interface RankResponseItem {
   point: number;
   created_at: string;
   max_point?: number;
+  avatar_url?: string;
 }
 
 export const fetchRawRankData = async (
@@ -126,7 +111,8 @@ export const uploadRankData = async (
     position4: record.fourth,
     busted: record.bifei,
     total_score: record.total,
-    point: record.pt
+    point: record.pt,
+    avatar_url: record.avatar
   }));
 
   try {
@@ -168,7 +154,27 @@ export const fetchRandomRankData = async (
   }
 };
 
-export const fetchRankData = async (
+export const fetchExternalRankData = async (dateRange: string, storeId: string = "127", limit: number = 200) => {
+  try {
+    const { data, error } = await supabase.functions.invoke('hook_session', {
+      body: {
+        date: dateRange,
+        storeId: storeId,
+        limit: limit,
+        page: "1"
+      }
+    });
+
+    if (error) throw error;
+    console.log("查询成功:", data);
+    return data;
+  } catch (error) {
+    console.error("fetchExternalRankData error:", error);
+    throw error;
+  }
+};
+
+export const fetchRankDataFromDB = async (
   year: number,
   month: number,
   week: number | 'Monthly',
@@ -240,6 +246,7 @@ export const fetchRankData = async (
         id: `sb-${item.id || index}`,
         rank: index + 1,
         name: item.nickname,
+        avatar: item.avatar_url,
         teamName: arena,
         totalScore: item.total_score,
         totalPT: parseFloat(item.point.toFixed(1)),
@@ -255,5 +262,94 @@ export const fetchRankData = async (
   } catch (error) {
     console.error('Failed to fetch rank data:', error);
     throw error;
+  }
+};
+
+export const fetchRankData = async (
+  year: number,
+  month: number,
+  week: number | 'Monthly',
+  arena: string
+): Promise<Competitor[]> => {
+  try {
+    // 1. Get Store Config
+    const storeConfig = getStoreConfig(arena);
+    
+    // 2. Get Date Range
+    let dateRange = '';
+    if (week === 'Monthly') {
+        const { startDate } = calculateWeekRange(year, month, 1);
+        const { endDate } = calculateWeekRange(year, month, 4);
+        
+        const formatDate = (d: Date) => {
+          const y = d.getFullYear();
+          const m = (d.getMonth() + 1).toString().padStart(2, '0');
+          const dd = d.getDate().toString().padStart(2, '0');
+          return `${y}-${m}-${dd}`;
+        };
+        dateRange = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    } else {
+        dateRange = getWeekDateRange(year, month, week).replace(/\//g, '-');
+    }
+
+    // 3. Call External API
+    // Note: fetchExternalRankData logs the result, so we don't need to log here again unless error
+    const data = await fetchExternalRankData(dateRange, storeConfig.id, storeConfig.limit);
+
+    if (!data || !data.success || !Array.isArray(data.list)) {
+      console.warn('External rank data format invalid or empty', data);
+      return [];
+    }
+
+    // 4. Transform and Sort
+    let items = data.list.map((item: any, index: number) => {
+        const games = Number(item.total || 0);
+        const first = Number(item.one || 0);
+        const second = Number(item.two || 0);
+        const third = Number(item.three || 0);
+        const fourth = Number(item.four || 0);
+        const pt = Number(item.point || 0);
+
+        const avgOrder = games > 0
+          ? (first * 1 + second * 2 + third * 3 + fourth * 4) / games
+          : 0;
+
+        const winRate = games > 0 ? (first / games) * 100 : 0;
+        
+        // Using 4th place as deal-in proxy for now as per previous logic
+        const dealInRate = games > 0 ? (fourth / games) * 100 : 0;
+
+        return {
+          id: `ext-${item.id || index}`,
+          // Rank will be assigned after sort
+          rank: 0, 
+          name: item.username || '',
+          avatar: item.avatarUrl,
+          teamName: arena,
+          totalScore: Number(item.score || 0),
+          totalPT: pt,
+          avgOrder: parseFloat(avgOrder.toFixed(2)),
+          winRate: parseFloat(winRate.toFixed(1)),
+          dealInRate: parseFloat(dealInRate.toFixed(1)),
+          gamesPlayed: games,
+          trend: 'stable' as const,
+          top4Rates: [first, second, third, fourth]
+        };
+    });
+
+    // Sort by PT descending
+    items.sort((a: any, b: any) => b.totalPT - a.totalPT);
+
+    // Assign Rank
+    items = items.map((item: any, index: number) => ({
+      ...item,
+      rank: index + 1
+    }));
+
+    return items;
+
+  } catch (error) {
+    console.error('Failed to fetch rank data from external source:', error);
+    return [];
   }
 };

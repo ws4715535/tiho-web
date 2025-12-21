@@ -1,6 +1,6 @@
 import React from 'react';
 import { Competitor } from '../types';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Crown } from 'lucide-react';
 
 interface RankCardProps {
   data: Competitor;
@@ -30,6 +30,15 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
     return 'font-bold text-slate-800 dark:text-slate-100 text-base sm:text-lg';
   };
 
+  const getCrownColor = (rank: number) => {
+    switch(rank) {
+      case 1: return 'text-yellow-500 fill-yellow-500';
+      case 2: return 'text-slate-400 fill-slate-400';
+      case 3: return 'text-amber-600 fill-amber-600';
+      default: return '';
+    }
+  };
+
   return (
     <div 
       onClick={onClick}
@@ -43,27 +52,42 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
             </div>
 
             {/* Info */}
-            <div className="flex flex-col">
-                <div className="flex items-center space-x-2">
-                    <span className={getNameClass(data.rank)}>{data.name}</span>
+            <div className="flex items-center space-x-3">
+                {/* Avatar with Crown */}
+                <div className="relative flex-shrink-0">
+                    {data.avatar ? (
+                        <img src={data.avatar} alt="" className="w-12 h-12 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700" />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-lg font-bold text-slate-500 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-700">
+                            {data.name.charAt(0)}
+                        </div>
+                    )}
                     {data.rank <= 3 && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 dark:bg-indigo-500 text-indigo-700 dark:text-white uppercase tracking-wider">前三</span>
+                        <div className="absolute -top-2 -right-1 transform rotate-12 drop-shadow-sm">
+                            <Crown className={`w-5 h-5 ${getCrownColor(data.rank)}`} />
+                        </div>
                     )}
                 </div>
-                {!isTeam && (
-                     <span className="inline-flex items-center justify-center whitespace-nowrap w-fit leading-none text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-700">
-                       总分: {data.totalScore}
-                     </span>
-                )}
-                {isTeam && data.members && (
-                    <div className="flex items-center mt-1 space-x-1">
-                        {data.members.slice(0, 4).map((m, i) => (
-                            <div key={i} className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-600" title={m.name}>
-                                {m.avatarStr}
-                            </div>
-                        ))}
+
+                <div className="flex flex-col h-12 justify-between py-0.5">
+                    <div className="flex items-center space-x-2 leading-none">
+                        <span className={getNameClass(data.rank)}>{data.name}</span>
                     </div>
-                )}
+                    {!isTeam && (
+                        <span className="inline-flex items-center justify-start whitespace-nowrap w-fit leading-none text-[11px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        总分: {data.totalScore}
+                        </span>
+                    )}
+                    {isTeam && data.members && (
+                        <div className="flex items-center space-x-1">
+                            {data.members.slice(0, 4).map((m, i) => (
+                                <div key={i} className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-600" title={m.name}>
+                                    {m.avatarStr}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
 

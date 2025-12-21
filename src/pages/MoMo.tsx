@@ -95,7 +95,8 @@ const transformDataToProfiles = (data: RankResponseItem[]): Profile[] => {
     const desc = descs[(item.id) % descs.length] || '享受每一局对局。';
 
     // Assign random avatar from the list based on ID
-    const avatarUrl = AVATAR_URLS[(item.id || index) % AVATAR_URLS.length];
+    // Prioritize avatar from API if available
+    const avatarUrl = item.avatar_url || AVATAR_URLS[(item.id || index) % AVATAR_URLS.length];
 
     return {
       id: item.id,

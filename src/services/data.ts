@@ -2,6 +2,7 @@ import { RankData, Competitor, Arena, RankCategory } from "../types";
 
 export type Raw = {
   name: string;
+  avatar?: string;
   games: number;
   first: number;
   second: number;
@@ -89,6 +90,7 @@ function toCompetitors(rows: Raw[]): Competitor[] {
       id: `comp-ind-${i}`,
       rank: i + 1,
       name: r.name,
+      avatar: r.avatar,
       teamName: '大学城',
       totalScore: r.total,
       totalPT: Number(r.pt.toFixed(1)),
@@ -175,6 +177,7 @@ function aggregateMonthlyRaw(month: string, arena: Arena, category: RankCategory
     } else {
       agg.set(r.name, {
         name: r.name,
+        avatar: r.avatar || prev.avatar,
         games: prev.games + r.games,
         first: prev.first + r.first,
         second: prev.second + r.second,

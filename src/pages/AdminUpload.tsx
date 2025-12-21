@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, CheckCircle, AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { saveRankData, Raw } from '../services/data';
-import { uploadRankData } from '../services/supabaseService';
+import { uploadRankData, fetchExternalRankData } from '../services/supabaseService';
 import { Arena } from '../types';
 import { getWeekDateRange } from '../lib/utils';
+import { getStoreConfig } from '../constants/stores';
 
 export const AdminUpload = () => {
   const navigate = useNavigate();
@@ -17,7 +18,52 @@ export const AdminUpload = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [autoUpdating, setAutoUpdating] = useState(false);
   const [showAllPreview, setShowAllPreview] = useState(false);
+
+  const handleAutoUpdate = async () => {
+    setAutoUpdating(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      // Format date as YYYY-MM-DD - YYYY-MM-DD
+      const dateRange = getWeekDateRange(year, month, week).replace(/\//g, '-');
+      
+      const storeConfig = getStoreConfig(arena);
+      const data = await fetchExternalRankData(dateRange, storeConfig.id, storeConfig.limit);
+      
+      if (!data || !data.success || !Array.isArray(data.list)) {
+        throw new Error('返回数据格式错误');
+      }
+
+      // Map response to Raw[]
+      const mappedData: Raw[] = data.list.map((item: any) => ({
+        name: item.username || '',
+        avatar: item.avatarUrl,
+        games: Number(item.total || 0),
+        first: Number(item.one || 0),
+        second: Number(item.two || 0),
+        third: Number(item.three || 0),
+        fourth: Number(item.four || 0),
+        bifei: Number(item.fly || 0),
+        total: Number(item.score || 0),
+        pt: Number(item.point || 0)
+      })).filter((item: Raw) => item.name); // Filter out invalid items
+
+      if (mappedData.length === 0) {
+        setError('未查询到相关比赛数据');
+      } else {
+        setPreviewData(mappedData);
+        setSuccess(`成功获取 ${mappedData.length} 条比赛记录`);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : '自动更新失败');
+    } finally {
+      setAutoUpdating(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -195,7 +241,17 @@ export const AdminUpload = () => {
 
         {/* File Upload */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h2 className="font-semibold text-lg dark:text-white mb-4">上传 CSV 文件</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-semibold text-lg dark:text-white">上传 CSV 文件</h2>
+            <button
+              onClick={handleAutoUpdate}
+              disabled={autoUpdating || loading}
+              className="px-3 py-1.5 text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors flex items-center gap-1 font-medium disabled:opacity-50"
+            >
+              {autoUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              自动更新
+            </button>
+          </div>
           
           <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer relative">
             <input 
@@ -271,7 +327,12 @@ export const AdminUpload = () => {
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                   {(showAllPreview ? previewData : previewData.slice(0, 5)).map((row, i) => (
                     <tr key={i} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                      <td className="px-4 py-3 font-medium dark:text-white">{row.name}</td>
+                      <td className="px-4 py-3 font-medium dark:text-white flex items-center gap-2">
+                        {row.avatar && (
+                          <img src={row.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
+                        )}
+                        <span>{row.name}</span>
+                      </td>
                       <td className="px-4 py-3 dark:text-slate-300">{row.games}</td>
                       <td className="px-4 py-3 dark:text-slate-300">{row.first}</td>
                       <td className="px-4 py-3 dark:text-slate-300">{row.second}</td>

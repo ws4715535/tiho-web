@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-function calculateWeekRange(year: number, month: number, week: number): { startDate: Date, endDate: Date } {
+export function calculateWeekRange(year: number, month: number, week: number): { startDate: Date, endDate: Date } {
   // Create date for the 1st day of the month
   // Note: Month in JS Date is 0-indexed (0=Jan, 11=Dec)
   const firstDay = new Date(year, month - 1, 1);
