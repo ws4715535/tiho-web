@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trophy, Calendar, Sparkles, User, Target, Crown } from 'lucide-react';
+import { ArrowLeft, Trophy, Calendar, Sparkles, User } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export const IndividualMatchIntro = () => {
