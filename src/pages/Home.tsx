@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
@@ -9,6 +9,8 @@ export const Home = () => {
   const navigate = useNavigate();
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const bannerTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const banners = [
     {
@@ -39,6 +41,30 @@ export const Home = () => {
 
   const prevBanner = () => {
     setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      handleBannerInteraction(nextBanner);
+    }
+    if (isRightSwipe) {
+      handleBannerInteraction(prevBanner);
+    }
   };
 
   useEffect(() => {
@@ -97,7 +123,12 @@ export const Home = () => {
 
       {/* Match Banners Carousel */}
       <div className="relative group/carousel">
-        <div className="overflow-hidden rounded-2xl shadow-lg">
+        <div 
+          className="overflow-hidden rounded-2xl shadow-lg"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div 
             className="flex transition-transform duration-500 ease-in-out" 
             style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
