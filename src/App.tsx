@@ -6,6 +6,10 @@ import { Home } from './pages/Home';
 import { MoMo } from './pages/MoMo';
 import { AdminUpload } from './pages/AdminUpload';
 import { AdminManage } from './pages/AdminManage';
+import { AdminTeamManager } from './pages/AdminTeamManager';
+import { TeamMatchIntro } from './pages/TeamMatchIntro';
+import { TeamList } from './pages/TeamList';
+import { IndividualMatchIntro } from './pages/IndividualMatchIntro';
 
 export default function App() {
   // Theme State (Global UI State)
@@ -37,6 +41,10 @@ export default function App() {
           <Route path="/ranking" element={<RankList />} />
           <Route path="/admin/upload" element={<AdminUpload />} />
           <Route path="/admin/manage" element={<AdminManage />} />
+          <Route path="/admin/teams" element={<AdminTeamManager />} />
+          <Route path="/team-intro" element={<TeamMatchIntro />} />
+          <Route path="/individual-intro" element={<IndividualMatchIntro />} />
+          <Route path="/team-list" element={<TeamList />} />
         </Routes>
       </main>
     </div>

@@ -1,12 +1,60 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 import { preloadMoMoData } from '../services/momoService';
 
 export const Home = () => {
   const navigate = useNavigate();
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const bannerTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const banners = [
+    {
+      id: 'team',
+      path: '/team-intro',
+      gradient: 'from-pink-500 to-rose-600',
+      label: 'NEW SEASON',
+      title: '双人成行 ❤️ 搭档立直赛',
+      desc: '寻找你的最佳拍档，共同冲击最强组合！双人组队，策略加倍，快乐加倍。',
+      icon: <Users className="h-16 w-16 text-white/90 drop-shadow-md" />,
+      actionText: '了解赛事详情'
+    },
+    {
+      id: 'individual',
+      path: '/individual-intro',
+      gradient: 'from-cyan-500 to-blue-600',
+      label: 'RANKING MATCH',
+      title: '最强雀士 🀄️ 个人排位赛',
+      desc: '实力至上，胜者为王。参与常驻排位赛事，赢取季度丰厚奖励，冲击雀圣段位！',
+      icon: <User className="h-16 w-16 text-white/90 drop-shadow-md" />,
+      actionText: '了解赛事详情'
+    }
+  ];
+
+  const nextBanner = () => {
+    setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
+  };
+
+  const prevBanner = () => {
+    setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
+  };
+
+  useEffect(() => {
+    // Auto-play
+    bannerTimerRef.current = setInterval(nextBanner, 5000);
+    return () => {
+      if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
+    };
+  }, []);
+
+  // Reset timer on manual interaction
+  const handleBannerInteraction = (action: () => void) => {
+    if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
+    action();
+    bannerTimerRef.current = setInterval(nextBanner, 5000);
+  };
 
   useEffect(() => {
     // Preload MoMo data when Home mounts
@@ -44,6 +92,71 @@ export const Home = () => {
                 查看联赛积分榜
                 <ArrowRight className="ml-2 w-5 h-5 opacity-50" />
             </Button>
+        </div>
+      </div>
+
+      {/* Match Banners Carousel */}
+      <div className="relative group/carousel">
+        <div className="overflow-hidden rounded-2xl shadow-lg">
+          <div 
+            className="flex transition-transform duration-500 ease-in-out" 
+            style={{ transform: `translateX(-${currentBannerIndex * 100}%)` }}
+          >
+            {banners.map((banner) => (
+              <div 
+                key={banner.id}
+                onClick={() => navigate(banner.path)}
+                className={`w-full flex-shrink-0 relative overflow-hidden bg-gradient-to-r ${banner.gradient} p-6 text-white cursor-pointer transform transition-all active:scale-[0.99]`}
+              >
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-white/20 blur-2xl"></div>
+                <div className="absolute bottom-0 left-0 -mb-4 -ml-4 h-24 w-24 rounded-full bg-black/10 blur-xl"></div>
+                
+                <div className="relative z-10 flex items-center justify-between">
+                  <div>
+                    <div className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur-md mb-3">
+                      <span className="animate-pulse mr-2 h-2 w-2 rounded-full bg-white"></span>
+                      {banner.label}
+                    </div>
+                    <h2 className="text-2xl font-black italic tracking-tight mb-1">{banner.title}</h2>
+                    <p className="text-white/90 text-sm font-medium max-w-xs leading-relaxed">
+                      {banner.desc}
+                    </p>
+                  </div>
+                  <div className="hidden sm:block transform group-hover/carousel:scale-110 transition-transform duration-300">
+                     {banner.icon}
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex items-center text-sm font-bold text-white/90">
+                  {banner.actionText} <ArrowRight className="ml-1 h-4 w-4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Carousel Controls */}
+        <button 
+          onClick={(e) => { e.stopPropagation(); handleBannerInteraction(prevBanner); }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button 
+          onClick={(e) => { e.stopPropagation(); handleBannerInteraction(nextBanner); }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Dots Indicators */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+          {banners.map((_, idx) => (
+            <div 
+              key={idx} 
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${currentBannerIndex === idx ? 'bg-white w-4' : 'bg-white/50'}`}
+            />
+          ))}
         </div>
       </div>
 

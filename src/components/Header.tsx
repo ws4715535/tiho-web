@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Moon, Sun, Cpu, Upload, Lock, Database, Heart } from 'lucide-react';
+import { Moon, Sun, Cpu, Upload, Lock, Database, Heart, Menu, Users } from 'lucide-react';
 import { Button } from './ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 
@@ -72,6 +72,13 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
           
           <div className="flex items-center space-x-2 relative">
               <button 
+                  onClick={() => navigate('/team-list')}
+                  className="p-2 rounded-full text-slate-500 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-white transition-all"
+                  title="战队列表"
+              >
+                  <Users className="h-5 w-5" />
+              </button>
+              <button 
                   onClick={() => navigate('/momo')}
                   className="group relative p-2 rounded-full text-rose-500 hover:bg-rose-100 dark:text-rose-400 dark:hover:bg-slate-800 transition-all"
                   title="雀友匹配"
@@ -86,12 +93,12 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
               >
                   {getThemeIcon()}
               </button>
-              {/* <button 
+              <button 
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="invisible p-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition-colors"
+                  className="p-2 text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-white transition-colors"
               >
                   <Menu className="h-6 w-6" />
-              </button> */}
+              </button>
 
               {/* Dropdown Menu */}
               {isMenuOpen && (
@@ -114,6 +121,13 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
                           >
                               <Database className="h-4 w-4 mr-2" />
                               管理成绩数据
+                          </button>
+                          <button
+                              onClick={() => handleAdminClick('/admin/teams')}
+                              className="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center transition-colors border-t border-slate-100 dark:border-slate-700"
+                          >
+                              <Users className="h-4 w-4 mr-2" />
+                              战队管理
                           </button>
                       </div>
                   </>

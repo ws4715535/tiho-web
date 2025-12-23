@@ -1,15 +1,20 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Inbox } from 'lucide-react';
 import { FilterBar } from '../components/FilterBar';
 import { RankCard } from '../components/RankCard';
+import { TeamRankCard } from '../components/TeamRankCard';
 import { DetailModal } from '../components/DetailModal';
+import { TeamDetailModal } from '../components/TeamDetailModal';
 import { fetchRankData } from '../services/supabaseService';
+import { fetchMockTeamRankData } from '../services/mockTeamData';
 import { getWeekDateRange, isWeekInProgress } from '../lib/utils';
 import { Competitor, RankCategory, Arena } from '../types';
 
 export const RankList = () => {
   // App State moved here
-  const [category, setCategory] = useState<RankCategory>('individual');
+  const [searchParams] = useSearchParams();
+  const [category, setCategory] = useState<RankCategory>((searchParams.get('cat') as RankCategory) || 'individual');
   const [arena, setArena] = useState<Arena>('大学城');
   const [month, setMonth] = useState<string>(() => {
     const now = new Date();
@@ -45,39 +50,40 @@ export const RankList = () => {
     const load = async () => {
       setLoading(true);
       
-      // Temporary: Team ranking API is not ready yet.
-      if (category === 'team') {
-        setList([]);
-        setLoading(false);
-        return;
-      }
-
-      const parsed = parseMonth(month);
-      if (!parsed) {
-        setLoading(false);
-        return;
-      }
-
       const controller = new AbortController();
 
       try {
-        const competitors = await fetchRankData(
-          parsed.year,
-          parsed.month,
-          week,
-          arena,
-          controller.signal
-        );
-        setList(competitors);
+        let competitors: Competitor[] = [];
+
+        if (category === 'team') {
+            competitors = await fetchMockTeamRankData();
+        } else {
+            const parsed = parseMonth(month);
+            if (!parsed) {
+                setLoading(false);
+                return;
+            }
+            competitors = await fetchRankData(
+                parsed.year,
+                parsed.month,
+                week,
+                arena,
+                controller.signal
+            );
+        }
+
+        // Check abort again before setting state
+        if (!controller.signal.aborted) {
+            setList(competitors);
+        }
       } catch (err) {
         if ((err as Error).name === 'AbortError') {
           console.log('Request cancelled');
         } else {
           console.error('Failed to fetch rank data:', err);
-          setList([]);
+          if (!controller.signal.aborted) setList([]);
         }
       } finally {
-        // Only turn off loading if not aborted (though aborted usually throws, but just in case)
         if (!controller.signal.aborted) {
           setLoading(false);
         }
@@ -151,12 +157,20 @@ export const RankList = () => {
           </div>
         ) : filteredData.length > 0 ? (
           filteredData.map((item) => (
-            <RankCard 
-              key={item.id} 
-              data={item} 
-              onClick={() => setSelectedCompetitor(item)}
-              isTeam={category === 'team'}
-            />
+            category === 'team' ? (
+                <TeamRankCard
+                    key={item.id}
+                    data={item}
+                    onClick={() => setSelectedCompetitor(item)}
+                />
+            ) : (
+                <RankCard 
+                    key={item.id} 
+                    data={item} 
+                    onClick={() => setSelectedCompetitor(item)}
+                    isTeam={false}
+                />
+            )
           ))
         ) : (
           <div className="text-center py-12 text-slate-500 dark:text-slate-400">
@@ -170,10 +184,18 @@ export const RankList = () => {
         )}
       </div>
 
-      <DetailModal 
-        data={selectedCompetitor} 
-        onClose={() => setSelectedCompetitor(null)} 
-      />
+      {/* Modals */}
+      {category === 'team' ? (
+          <TeamDetailModal 
+            data={selectedCompetitor} 
+            onClose={() => setSelectedCompetitor(null)} 
+          />
+      ) : (
+          <DetailModal 
+            data={selectedCompetitor} 
+            onClose={() => setSelectedCompetitor(null)} 
+          />
+      )}
     </>
   );
 };

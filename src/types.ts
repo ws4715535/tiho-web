@@ -6,6 +6,11 @@ export interface Member {
   name: string;
   role: 'Captain' | 'Vice' | 'Member';
   avatarStr: string;
+  score?: number; // Added score for contribution calculation
+  gamesPlayed?: number;
+  winRate?: number;
+  avgOrder?: number;
+  dealInRate?: number;
 }
 
 export interface Competitor {
