@@ -4,10 +4,9 @@ import { Header, Theme } from './components/Header';
 import { RankList } from './components/RankList';
 import { Home } from './pages/Home';
 import { MoMo } from './pages/MoMo';
-import { AdminUpload } from './pages/AdminUpload';
-import { AdminManage } from './pages/AdminManage';
-import { AdminTeamManager } from './pages/AdminTeamManager';
+import AdminLayout from './pages/AdminLayout';
 import { TeamMatchIntro } from './pages/TeamMatchIntro';
+import { MatchIntro } from './pages/MatchIntro';
 import { TeamList } from './pages/TeamList';
 import { IndividualMatchIntro } from './pages/IndividualMatchIntro';
 
@@ -29,24 +28,30 @@ export default function App() {
   }, [theme]);
 
   return (
-    <div className="min-h-screen pb-12 transition-colors duration-300">
-      <Header theme={theme} setTheme={setTheme} />
-      
-      {/* Main Layout Container */}
-      <main className="pt-20 px-4 max-w-2xl mx-auto">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/momo" element={<MoMo />} />
-          <Route path="/match" element={<Navigate to="/momo" replace />} />
-          <Route path="/ranking" element={<RankList />} />
-          <Route path="/admin/upload" element={<AdminUpload />} />
-          <Route path="/admin/manage" element={<AdminManage />} />
-          <Route path="/admin/teams" element={<AdminTeamManager />} />
-          <Route path="/team-intro" element={<TeamMatchIntro />} />
-          <Route path="/individual-intro" element={<IndividualMatchIntro />} />
-          <Route path="/team-list" element={<TeamList />} />
-        </Routes>
-      </main>
+    <div className="min-h-screen transition-colors duration-300">
+      <Routes>
+        {/* Admin Routes - Full Width */}
+        <Route path="/admin/*" element={<AdminLayout />} />
+
+        {/* Public Routes - Constrained Width & With Header */}
+        <Route path="*" element={
+          <>
+            <Header theme={theme} setTheme={setTheme} />
+            <main className="pt-20 px-4 max-w-2xl mx-auto pb-12">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/momo" element={<MoMo />} />
+                <Route path="/match" element={<Navigate to="/momo" replace />} />
+                <Route path="/ranking" element={<RankList />} />
+                <Route path="/team-intro" element={<TeamMatchIntro />} />
+                <Route path="/individual-intro" element={<IndividualMatchIntro />} />
+                <Route path="/tournament/:id" element={<MatchIntro />} />
+                <Route path="/team-list" element={<TeamList />} />
+              </Routes>
+            </main>
+          </>
+        } />
+      </Routes>
     </div>
   );
 }

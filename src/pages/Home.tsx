@@ -1,9 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 import { preloadMoMoData } from '../services/momoService';
+import { supabase } from '../lib/supabase/client';
+
+interface Banner {
+  id: string;
+  path: string;
+  gradient_from: string;
+  gradient_to: string;
+  label: string;
+  title: string;
+  desc: string;
+  type: string;
+}
 
 export const Home = () => {
   const navigate = useNavigate();
@@ -11,35 +23,59 @@ export const Home = () => {
   const bannerTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [loadingBanners, setLoadingBanners] = useState(true);
 
-  const banners = [
-    {
-      id: 'team',
-      path: '/team-intro',
-      gradient: 'from-pink-500 to-rose-600',
-      label: 'NEW SEASON',
-      title: '双人成行 ❤️ 搭档立直赛',
-      desc: '寻找你的最佳拍档，共同冲击最强组合！双人组队，策略加倍，快乐加倍。',
-      icon: <Users className="h-16 w-16 text-white/90 drop-shadow-md" />,
-      actionText: '了解赛事详情'
-    },
-    {
-      id: 'individual',
-      path: '/individual-intro',
-      gradient: 'from-cyan-500 to-blue-600',
-      label: 'RANKING MATCH',
-      title: '最强雀士 🀄️ 个人排位赛',
-      desc: '实力至上，胜者为王。参与常驻排位赛事，赢取季度丰厚奖励，冲击雀圣段位！',
-      icon: <User className="h-16 w-16 text-white/90 drop-shadow-md" />,
-      actionText: '了解赛事详情'
-    }
-  ];
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('*')
+          .in('status', ['active', 'upcoming'])
+          .order('sort_order', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const mappedBanners = data.map((t: any) => ({
+            id: t.id,
+            path: `/tournament/${t.id}`,
+            gradient_from: t.banner_gradient_from || 'pink-500',
+            gradient_to: t.banner_gradient_to || 'rose-600',
+            label: t.status === 'active' ? 'NEW SEASON' : 'UPCOMING',
+            title: t.title,
+            desc: t.intro,
+            type: t.type
+          }));
+          setBanners(mappedBanners);
+        } else {
+          // Fallback to static if no data in DB (or keep empty if preferred, but user wants end-to-end, so let's stick to DB)
+          // If DB is empty, show nothing or default? 
+          // Let's provide a default strictly for demo if empty, or just empty.
+          // User asked to configure via admin. If admin is empty, home is empty.
+          // But I should probably seed the DB with at least one tournament so the home page isn't broken/empty initially.
+          // However, I can't easily seed without SQL.
+          // I'll stick to empty array if fetch returns empty.
+          setBanners([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch banners:', err);
+      } finally {
+        setLoadingBanners(false);
+      }
+    };
+
+    fetchBanners();
+  }, []);
 
   const nextBanner = () => {
+    if (banners.length === 0) return;
     setCurrentBannerIndex((prev) => (prev + 1) % banners.length);
   };
 
   const prevBanner = () => {
+    if (banners.length === 0) return;
     setCurrentBannerIndex((prev) => (prev - 1 + banners.length) % banners.length);
   };
 
@@ -68,18 +104,21 @@ export const Home = () => {
   };
 
   useEffect(() => {
-    // Auto-play
-    bannerTimerRef.current = setInterval(nextBanner, 5000);
+    if (banners.length > 0) {
+        bannerTimerRef.current = setInterval(nextBanner, 5000);
+    }
     return () => {
       if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
     };
-  }, []);
+  }, [banners.length]);
 
   // Reset timer on manual interaction
   const handleBannerInteraction = (action: () => void) => {
     if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
     action();
-    bannerTimerRef.current = setInterval(nextBanner, 5000);
+    if (banners.length > 0) {
+        bannerTimerRef.current = setInterval(nextBanner, 5000);
+    }
   };
 
   useEffect(() => {
@@ -122,6 +161,11 @@ export const Home = () => {
       </div>
 
       {/* Match Banners Carousel */}
+      {loadingBanners ? (
+        <div className="w-full h-48 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+        </div>
+      ) : banners.length > 0 ? (
       <div className="relative group/carousel">
         <div 
           className="overflow-hidden rounded-2xl shadow-lg"
@@ -137,7 +181,8 @@ export const Home = () => {
               <div 
                 key={banner.id}
                 onClick={() => navigate(banner.path)}
-                className={`w-full flex-shrink-0 relative overflow-hidden bg-gradient-to-r ${banner.gradient} p-6 text-white cursor-pointer transform transition-all active:scale-[0.99]`}
+                style={{ background: `linear-gradient(to right, ${banner.gradient_from.startsWith('#') || banner.gradient_from.startsWith('rgb') ? banner.gradient_from : `var(--color-${banner.gradient_from}, ${banner.gradient_from})`}, ${banner.gradient_to.startsWith('#') || banner.gradient_to.startsWith('rgb') ? banner.gradient_to : `var(--color-${banner.gradient_to}, ${banner.gradient_to})`})` }}
+                className={`w-full flex-shrink-0 relative overflow-hidden p-6 text-white cursor-pointer transform transition-all active:scale-[0.99] ${!banner.gradient_from.startsWith('#') && !banner.gradient_from.startsWith('rgb') ? `bg-gradient-to-r from-${banner.gradient_from} to-${banner.gradient_to}` : ''}`}
               >
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-white/20 blur-2xl"></div>
                 <div className="absolute bottom-0 left-0 -mb-4 -ml-4 h-24 w-24 rounded-full bg-black/10 blur-xl"></div>
@@ -154,12 +199,12 @@ export const Home = () => {
                     </p>
                   </div>
                   <div className="hidden sm:block transform group-hover/carousel:scale-110 transition-transform duration-300">
-                     {banner.icon}
+                     {banner.type === 'team' ? <Users className="h-16 w-16 text-white/90 drop-shadow-md" /> : <User className="h-16 w-16 text-white/90 drop-shadow-md" />}
                   </div>
                 </div>
                 
                 <div className="mt-4 flex items-center text-sm font-bold text-white/90">
-                  {banner.actionText} <ArrowRight className="ml-1 h-4 w-4" />
+                  了解赛事详情 <ArrowRight className="ml-1 h-4 w-4" />
                 </div>
               </div>
             ))}
@@ -169,13 +214,13 @@ export const Home = () => {
         {/* Carousel Controls */}
         <button 
           onClick={(e) => { e.stopPropagation(); handleBannerInteraction(prevBanner); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-opacity z-20"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button 
           onClick={(e) => { e.stopPropagation(); handleBannerInteraction(nextBanner); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-opacity z-20"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -190,6 +235,11 @@ export const Home = () => {
           ))}
         </div>
       </div>
+      ) : (
+        <div className="w-full h-32 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 text-sm border border-slate-200 dark:border-slate-700">
+           暂无进行中的赛事
+        </div>
+      )}
 
       {/* Features Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

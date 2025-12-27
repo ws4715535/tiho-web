@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Moon, Sun, Cpu, Upload, Lock, Database, Heart, Menu, Users } from 'lucide-react';
+import { Moon, Sun, Cpu, Heart, Menu, Users, LayoutDashboard, Lock } from 'lucide-react';
 import { Button } from './ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 
@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
   const [isPwdModalOpen, setIsPwdModalOpen] = useState(false);
   const [pwdInput, setPwdInput] = useState('');
   const [pwdError, setPwdError] = useState(false);
-  const [targetPath, setTargetPath] = useState('/admin/upload');
+  const [targetPath, setTargetPath] = useState('/admin');
   
   const cycleTheme = () => {
     if (theme === 'light') setTheme('dark');
@@ -109,25 +109,11 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
                       ></div>
                       <div className="absolute top-12 right-0 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2">
                           <button
-                              onClick={() => handleAdminClick('/admin/upload')}
+                              onClick={() => handleAdminClick('/admin')}
                               className="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center transition-colors"
                           >
-                              <Upload className="h-4 w-4 mr-2" />
-                              上传成绩数据
-                          </button>
-                          <button
-                              onClick={() => handleAdminClick('/admin/manage')}
-                              className="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center transition-colors border-t border-slate-100 dark:border-slate-700"
-                          >
-                              <Database className="h-4 w-4 mr-2" />
-                              管理成绩数据
-                          </button>
-                          <button
-                              onClick={() => handleAdminClick('/admin/teams')}
-                              className="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center transition-colors border-t border-slate-100 dark:border-slate-700"
-                          >
-                              <Users className="h-4 w-4 mr-2" />
-                              战队管理
+                              <LayoutDashboard className="h-4 w-4 mr-2" />
+                              管理员后台
                           </button>
                       </div>
                   </>
