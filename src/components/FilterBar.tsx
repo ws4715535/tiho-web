@@ -4,7 +4,7 @@ import { RankCategory, Arena } from '../types';
 // no external month list; manual month stepping via parsing
 import { Button } from './ui/Button';
 import { TabsList, TabsTrigger } from './ui/Tabs';
-import { cn, isWeekInProgress } from '../lib/utils';
+import { cn, isWeekInProgress, getWeeksInMonth } from '../lib/utils';
 
 interface FilterBarProps {
   category: RankCategory;
@@ -41,7 +41,19 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         if (mm > 12) { mm = 1; y += 1; }
       }
       setMonth(`${y}年${mm}月`);
+      setWeek(1);
   };
+
+  // Calculate weeks for the currently selected month
+  const currentWeeks = React.useMemo(() => {
+    const m = month.match(/^(\d{4})年(\d{1,2})月$/);
+    if (!m) return [1, 2, 3, 4]; // Fallback
+    const y = parseInt(m[1], 10);
+    const mm = parseInt(m[2], 10);
+    const count = getWeeksInMonth(y, mm);
+    // Create array [1, 2, ..., count]
+    return Array.from({ length: count }, (_, i) => i + 1);
+  }, [month]);
 
   // Logic to scroll selected week into view
   useEffect(() => {
@@ -91,7 +103,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             ref={weekContainerRef}
             className="flex space-x-2 overflow-x-auto no-scrollbar pb-1 px-1 pt-5 snap-x"
           >
-            {[1, 2, 3, 4, 'Monthly'].map((w) => {
+            {[...currentWeeks, 'Monthly'].map((w) => {
                 const isSelected = week === w; 
                 
                 // Check if this week is currently in progress

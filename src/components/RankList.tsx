@@ -8,39 +8,66 @@ import { DetailModal } from '../components/DetailModal';
 import { TeamDetailModal } from '../components/TeamDetailModal';
 import { fetchRankData } from '../services/supabaseService';
 import { fetchMockTeamRankData } from '../services/mockTeamData';
-import { getWeekDateRange, isWeekInProgress } from '../lib/utils';
+import { getWeekDateRange, calculateWeekRange } from '../lib/utils';
 import { Competitor, RankCategory, Arena } from '../types';
 
 export const RankList = () => {
-  // App State moved here
+  // State Initializers that run once on mount
   const [searchParams] = useSearchParams();
   const [category, setCategory] = useState<RankCategory>((searchParams.get('cat') as RankCategory) || 'individual');
   const [arena, setArena] = useState<Arena>('大学城');
-  const [month, setMonth] = useState<string>(() => {
-    const now = new Date();
-    return `${now.getFullYear()}年${now.getMonth() + 1}月`;
-  });
-  const [week, setWeek] = useState<number | 'Monthly'>(() => {
-    // Auto-select current week based on date
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = now.getMonth() + 1;
-    
-    // Check weeks 1-4
-    for (let w = 1; w <= 4; w++) {
-      if (isWeekInProgress(y, m, w)) {
-        return w;
-      }
-    }
-    return 3; // Default fallback
-  });
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompetitor, setSelectedCompetitor] = useState<Competitor | null>(null);
+
+  // Initialize date states
+  const [month, setMonth] = useState<string>(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    for (let w = 1; w <= 5; w++) {
+        const { startDate, endDate } = calculateWeekRange(currentYear, currentMonth, w);
+        if (now >= startDate && now <= endDate) {
+            return `${endDate.getFullYear()}年${endDate.getMonth() + 1}月`;
+        }
+    }
+
+    return `${currentYear}年${currentMonth}月`;
+  });
+
+  const [week, setWeek] = useState<number | 'Monthly'>(() => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    
+    let targetYear = currentYear;
+    let targetMonth = currentMonth;
+    
+    for (let w = 1; w <= 5; w++) {
+        const { startDate, endDate } = calculateWeekRange(currentYear, currentMonth, w);
+        if (now >= startDate && now <= endDate) {
+             targetYear = endDate.getFullYear();
+             targetMonth = endDate.getMonth() + 1;
+             break;
+        }
+    }
+    
+    for (let w = 1; w <= 5; w++) {
+        const { startDate, endDate } = calculateWeekRange(targetYear, targetMonth, w);
+        if (now >= startDate && now <= endDate) {
+            return w;
+        }
+    }
+    
+    if (now.getDate() < 7) return 1;
+    if (now.getDate() > 21) return 4;
+    return 1;
+  });
 
   const [list, setList] = useState<Competitor[]>([]);
   const [loading, setLoading] = useState(false);
 
-
+  // Effect to load data when filters change
   useEffect(() => {
     const parseMonth = (m: string) => {
       const mm = m.match(/^(\d{4})年(\d{1,2})月$/);
