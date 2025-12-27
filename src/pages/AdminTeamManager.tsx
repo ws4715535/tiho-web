@@ -2,18 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, Edit2, Users, Save, X, Loader2, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { supabase } from '../lib/supabase/client';
-
-// DB Schema Interface
-interface PairedTeam {
-  id: string;
-  team_name: string;
-  avatar_url: string;
-  description: string;
-  member_1_name: string;
-  member_2_name: string;
-  total_score: number;
-}
+import { fetchAllTeams, createTeam, updateTeam, deleteTeam, type PairedTeam } from '../services/teamService';
 
 export const AdminTeamManager = () => {
   const navigate = useNavigate();
@@ -33,32 +22,21 @@ export const AdminTeamManager = () => {
   });
 
   // Fetch Teams
-const fetchTeams = async () => {
-  setLoading(true);
-  try {
-    const { data, error } = await supabase.functions.invoke('paired-teams-manager', {
-      method: 'GET',
-      // 这里不需要手动传 Headers，supabase-js 会自动带上 apikey 和 auth
-    });
-
-    // Supabase invoke 的 error 对象可能包含具体的 message
-    if (error) {
-      console.error('Edge Function Error:', error);
-      throw new Error(error.message || 'Server Error');
+  const loadTeams = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchAllTeams();
+      setTeams(data);
+    } catch (err) {
+      console.error('Failed to fetch teams:', err);
+      alert('获取战队列表失败，请检查网络或权限');
+    } finally {
+      setLoading(false);
     }
-    
-    setTeams(data || []);
-  } catch (err) {
-    console.error('Failed to fetch teams:', err);
-    // 这里的 err 可能是网络错误（CORS）或业务错误
-    alert(`获取列表失败}`);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
-    fetchTeams();
+    loadTeams();
   }, []);
 
   // Open Modal
@@ -95,18 +73,16 @@ const fetchTeams = async () => {
 
     setActionLoading(true);
     try {
-      const method = currentId ? 'PUT' : 'POST';
-      const body = currentId ? { id: currentId, ...formData } : formData;
-
-      const { error } = await supabase.functions.invoke('paired-teams-manager', {
-        method,
-        body
-      });
-
-      if (error) throw error;
+      if (currentId) {
+        // Update
+        await updateTeam(currentId, formData);
+      } else {
+        // Insert
+        await createTeam(formData);
+      }
 
       setIsModalOpen(false);
-      fetchTeams(); // Refresh list
+      loadTeams(); // Refresh list
     } catch (err) {
       console.error('Operation failed:', err);
       alert('操作失败，请重试');
@@ -121,13 +97,8 @@ const fetchTeams = async () => {
 
     setActionLoading(true); // Global loading or specific item loading? Global for simplicity
     try {
-      const { error } = await supabase.functions.invoke('paired-teams-manager', {
-        method: 'DELETE',
-        body: { id }
-      });
-
-      if (error) throw error;
-      fetchTeams();
+      await deleteTeam(id);
+      loadTeams();
     } catch (err) {
       console.error('Delete failed:', err);
       alert('删除失败');
@@ -157,7 +128,7 @@ const fetchTeams = async () => {
             <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={fetchTeams} 
+                onClick={loadTeams} 
                 disabled={loading}
                 className="text-slate-500"
             >
