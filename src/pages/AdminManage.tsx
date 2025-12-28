@@ -86,10 +86,7 @@ export const AdminManage = () => {
     if (!editingId) return;
 
     try {
-      // Calculate total score if needed, but usually we trust manual input or auto-calc? 
-      // For now trust manual input.
       await updateRankDataItem(editingId, editForm);
-      
       setData(prev => prev.map(item => item.id === editingId ? { ...item, ...editForm } : item));
       setEditingId(null);
       setSuccess('更新成功');
@@ -99,12 +96,6 @@ export const AdminManage = () => {
   };
 
   // Initial load
-  useEffect(() => {
-    loadData();
-  }, []); // Only mount? Or maybe not, let user click query. But usually admin wants to see something.
-  // Actually let's not auto load to avoid accidental heavy queries, or maybe load with default. 
-  // Let's load with current filters when they change? No, explicit query is safer for admin tools.
-  // But let's do it on mount once.
   useEffect(() => {
     loadData();
   }, []);

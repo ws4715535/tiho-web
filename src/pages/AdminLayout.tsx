@@ -8,12 +8,14 @@ import {
   Trophy, 
   Menu, 
   LogOut,
-  Home
+  Home,
+  Settings
 } from 'lucide-react';
 import { AdminUpload } from './AdminUpload';
 import { AdminManage } from './AdminManage';
 import { AdminTeamManager } from './AdminTeamManager';
 import { AdminTournamentManager } from './AdminTournamentManager';
+import { AdminCommunity } from './AdminCommunity';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -35,6 +37,7 @@ const AdminLayout = () => {
     { path: '/admin/teams', label: '战队管理', icon: <Users className="w-5 h-5" /> },
     { path: '/admin/upload', label: '成绩上传', icon: <Upload className="w-5 h-5" /> },
     { path: '/admin/manage', label: '成绩管理', icon: <Database className="w-5 h-5" /> },
+    { path: '/admin/community', label: '社群配置', icon: <Settings className="w-5 h-5" /> },
   ];
 
   const isActive = (path: string, exact = false) => {
@@ -124,6 +127,7 @@ const AdminLayout = () => {
                 <Route path="/teams" element={<AdminTeamManager />} />
                 <Route path="/upload" element={<AdminUpload />} />
                 <Route path="/manage" element={<AdminManage />} />
+                <Route path="/community" element={<AdminCommunity />} />
              </Routes>
           </div>
         </main>

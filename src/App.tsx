@@ -9,6 +9,10 @@ import { TeamMatchIntro } from './pages/TeamMatchIntro';
 import { MatchIntro } from './pages/MatchIntro';
 import { TeamList } from './pages/TeamList';
 import { IndividualMatchIntro } from './pages/IndividualMatchIntro';
+import { DataAnalysis } from './pages/DataAnalysis';
+import { FairPlay } from './pages/FairPlay';
+import { Community } from './pages/Community';
+import { LeagueSystem } from './pages/LeagueSystem';
 
 export default function App() {
   // Theme State (Global UI State)
@@ -47,6 +51,10 @@ export default function App() {
                 <Route path="/individual-intro" element={<IndividualMatchIntro />} />
                 <Route path="/tournament/:id" element={<MatchIntro />} />
                 <Route path="/team-list" element={<TeamList />} />
+                <Route path="/data-analysis" element={<DataAnalysis />} />
+                <Route path="/fair-play" element={<FairPlay />} />
+                <Route path="/community" element={<Community />} />
+                <Route path="/league-system" element={<LeagueSystem />} />
               </Routes>
             </main>
           </>

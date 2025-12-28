@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Loader2, Heart } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 import { preloadMoMoData } from '../services/momoService';
@@ -214,13 +214,13 @@ export const Home = () => {
         {/* Carousel Controls */}
         <button 
           onClick={(e) => { e.stopPropagation(); handleBannerInteraction(prevBanner); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-opacity z-20"
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-opacity z-20 opacity-50 hover:opacity-100"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button 
           onClick={(e) => { e.stopPropagation(); handleBannerInteraction(nextBanner); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-opacity z-20"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-sm transition-opacity z-20 opacity-50 hover:opacity-100"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -243,7 +243,46 @@ export const Home = () => {
 
       {/* Features Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group">
+        <div 
+          onClick={() => navigate('/community')}
+          className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group cursor-pointer sm:col-span-2 relative overflow-hidden"
+        >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
+            
+            <div className="flex items-start justify-between relative z-10">
+                <div>
+                    <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">活跃社群</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mb-4">
+                        汇聚各路高手，定期举办交流赛与教学活动，共同进步。
+                    </p>
+                    <div className="inline-flex items-center text-sm font-bold text-emerald-600 dark:text-emerald-400 group-hover:underline">
+                        加入俱乐部 <ArrowRight className="ml-1 w-4 h-4" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div 
+          onClick={() => navigate('/momo')}
+          className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group cursor-pointer relative overflow-hidden"
+        >
+             <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/10 rounded-bl-full -mr-6 -mt-6 pointer-events-none"></div>
+            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Match. Chat. Meet.</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+                不仅是竞技，更是交友。心动功能❤️帮你发现身边和全国的雀友，开启你的心动对局。
+            </p>
+        </div>
+
+        <div 
+          onClick={() => navigate('/data-analysis')}
+          className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+        >
             <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
@@ -253,7 +292,10 @@ export const Home = () => {
             </p>
         </div>
 
-        <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group">
+        <div 
+          onClick={() => navigate('/fair-play')}
+          className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+        >
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </div>
@@ -263,17 +305,10 @@ export const Home = () => {
             </p>
         </div>
 
-        <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group">
-            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">活跃社群</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-                汇聚各路高手，定期举办交流赛与教学活动，共同进步。
-            </p>
-        </div>
-
-        <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group">
+        <div 
+          onClick={() => navigate('/league-system')}
+          className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group cursor-pointer"
+        >
             <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             </div>
