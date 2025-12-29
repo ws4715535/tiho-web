@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Calendar, Sparkles, User, Users, Loader2, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Trophy, Calendar, Sparkles, User, Users, Loader2, FileText, Download, QrCode, X, Copy, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase/client';
 
@@ -18,6 +18,12 @@ interface Tournament {
   banner_gradient_from: string;
   banner_gradient_to: string;
   pdf_url?: string;
+  registration_contact1_name?: string;
+  registration_contact1_wechat?: string;
+  registration_contact1_qr?: string;
+  registration_contact2_name?: string;
+  registration_contact2_wechat?: string;
+  registration_contact2_qr?: string;
 }
 
 export const MatchIntro = () => {
@@ -25,6 +31,24 @@ export const MatchIntro = () => {
   const { id } = useParams();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showRegistration, setShowRegistration] = useState(false);
+  const [copySuccess, setCopySuccess] = useState('');
+
+  useEffect(() => {
+    if (copySuccess) {
+      const timer = setTimeout(() => setCopySuccess(''), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copySuccess]);
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess('微信号已复制');
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   useEffect(() => {
     const fetchTournament = async () => {
@@ -67,8 +91,112 @@ export const MatchIntro = () => {
     );
   }
 
+  // Check if any registration info exists
+  const hasRegistration = tournament.registration_contact1_name || tournament.registration_contact1_qr || tournament.registration_contact2_name || tournament.registration_contact2_qr;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-in fade-in duration-500">
+      {/* Registration Modal */}
+      {showRegistration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowRegistration(false)}>
+           <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden p-6 relative" onClick={e => e.stopPropagation()}>
+              <button 
+                  onClick={() => setShowRegistration(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                  <X className="w-5 h-5 text-slate-500" />
+              </button>
+              
+              <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-6">赛事报名</h3>
+              
+              <div className="space-y-8">
+                  {/* Contact 1 */}
+                  {(tournament.registration_contact1_name || tournament.registration_contact1_qr) && (
+                      <div className="flex flex-col items-center text-center space-y-3">
+                          {tournament.registration_contact1_qr ? (
+                              <div className="w-48 h-48 bg-slate-100 dark:bg-slate-700 rounded-xl p-2 border-2 border-dashed border-slate-300 dark:border-slate-600">
+                                  <img src={tournament.registration_contact1_qr} alt="报名二维码1" className="w-full h-full object-contain rounded-lg" />
+                              </div>
+                          ) : (
+                              <div className="w-48 h-48 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400">
+                                  暂无二维码
+                              </div>
+                          )}
+                          <div>
+                              <div className="font-bold text-lg text-slate-900 dark:text-white">{tournament.registration_contact1_name || '报名联系人'}</div>
+                              {tournament.registration_contact1_wechat && (
+                                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                      <span>微信号: <span className="font-mono select-all">{tournament.registration_contact1_wechat}</span></span>
+                                      <button 
+                                        onClick={() => handleCopy(tournament.registration_contact1_wechat!)}
+                                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-indigo-500 transition-colors"
+                                        title="复制微信号"
+                                      >
+                                          <Copy className="w-3.5 h-3.5" />
+                                      </button>
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  )}
+
+                  {/* Divider if both exist */}
+                  {(tournament.registration_contact1_name || tournament.registration_contact1_qr) && (tournament.registration_contact2_name || tournament.registration_contact2_qr) && (
+                      <div className="w-full h-px bg-slate-200 dark:bg-slate-700"></div>
+                  )}
+
+                  {/* Contact 2 */}
+                  {(tournament.registration_contact2_name || tournament.registration_contact2_qr) && (
+                      <div className="flex flex-col items-center text-center space-y-3">
+                          {tournament.registration_contact2_qr ? (
+                              <div className="w-48 h-48 bg-slate-100 dark:bg-slate-700 rounded-xl p-2 border-2 border-dashed border-slate-300 dark:border-slate-600">
+                                  <img src={tournament.registration_contact2_qr} alt="报名二维码2" className="w-full h-full object-contain rounded-lg" />
+                              </div>
+                          ) : (
+                              <div className="w-48 h-48 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-slate-400">
+                                  暂无二维码
+                              </div>
+                          )}
+                          <div>
+                              <div className="font-bold text-lg text-slate-900 dark:text-white">{tournament.registration_contact2_name || '报名联系人'}</div>
+                              {tournament.registration_contact2_wechat && (
+                                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                      <span>微信号: <span className="font-mono select-all">{tournament.registration_contact2_wechat}</span></span>
+                                      <button 
+                                        onClick={() => handleCopy(tournament.registration_contact2_wechat!)}
+                                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-indigo-500 transition-colors"
+                                        title="复制微信号"
+                                      >
+                                          <Copy className="w-3.5 h-3.5" />
+                                      </button>
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  )}
+
+                  {!hasRegistration && (
+                      <div className="text-center text-slate-500 py-8">
+                          暂未配置报名信息
+                      </div>
+                  )}
+              </div>
+              
+              <p className="text-center text-xs text-slate-400 mt-6">
+                  请添加联系人微信或扫码进行报名咨询
+              </p>
+
+              {/* Toast Notification */}
+              {copySuccess && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                    {copySuccess}
+                </div>
+              )}
+           </div>
+        </div>
+      )}
+
       {/* Navigation Header */}
       <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -118,6 +246,16 @@ export const MatchIntro = () => {
               <Trophy className="w-4 h-4 mr-2" />
               查看榜单
             </Button>
+            
+            {tournament.status !== 'archived' && (
+                <Button 
+                  onClick={() => setShowRegistration(true)}
+                  className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-600 text-white hover:from-pink-600 hover:to-rose-700 font-bold shadow-lg shadow-pink-900/20 border-none"
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  一键报名
+                </Button>
+            )}
           </div>
         </div>
       </div>

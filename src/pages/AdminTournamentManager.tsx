@@ -20,6 +20,12 @@ interface Tournament {
   rewards_desc: string;
   sort_order: number;
   pdf_url?: string;
+  registration_contact1_name?: string;
+  registration_contact1_wechat?: string;
+  registration_contact1_qr?: string;
+  registration_contact2_name?: string;
+  registration_contact2_wechat?: string;
+  registration_contact2_qr?: string;
 }
 
 export const AdminTournamentManager = () => {
@@ -29,6 +35,7 @@ export const AdminTournamentManager = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadingQR, setUploadingQR] = useState<string | null>(null);
   
   // Colors for picker
   const GRADIENT_COLORS = [
@@ -51,7 +58,13 @@ export const AdminTournamentManager = () => {
     rules_desc: '',
     rewards_desc: '',
     sort_order: 0,
-    pdf_url: ''
+    pdf_url: '',
+    registration_contact1_name: '',
+    registration_contact1_wechat: '',
+    registration_contact1_qr: '',
+    registration_contact2_name: '',
+    registration_contact2_wechat: '',
+    registration_contact2_qr: ''
   });
 
   const fetchTournaments = async () => {
@@ -96,7 +109,13 @@ export const AdminTournamentManager = () => {
         rules_desc: '',
         rewards_desc: '',
         sort_order: 0,
-        pdf_url: ''
+        pdf_url: '',
+        registration_contact1_name: '',
+        registration_contact1_wechat: '',
+        registration_contact1_qr: '',
+        registration_contact2_name: '',
+        registration_contact2_wechat: '',
+        registration_contact2_qr: ''
       });
     }
     setIsModalOpen(true);
@@ -136,6 +155,36 @@ export const AdminTournamentManager = () => {
     }
   };
 
+  const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'registration_contact1_qr' | 'registration_contact2_qr') => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    setUploadingQR(field);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `reg_qr_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      // Use community_settings bucket or create a new one for general images if preferred
+      // Assuming community_settings is public and suitable for images
+      const { error: uploadError } = await supabase.storage
+        .from('community_settings') 
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('community_settings')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({ ...prev, [field]: data.publicUrl }));
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('上传失败: ' + (err as Error).message);
+    } finally {
+      setUploadingQR(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.type) {
@@ -159,6 +208,8 @@ export const AdminTournamentManager = () => {
       }
 
       setIsModalOpen(false);
+      // Clear home page cache to reflect changes immediately
+      localStorage.removeItem('tiho_banners_cache');
       fetchTournaments();
     } catch (err) {
       console.error('Operation failed:', err);
@@ -179,6 +230,8 @@ export const AdminTournamentManager = () => {
         .eq('id', id);
 
       if (error) throw error;
+      // Clear home page cache to reflect changes immediately
+      localStorage.removeItem('tiho_banners_cache');
       fetchTournaments();
     } catch (err) {
       console.error('Delete failed:', err);
@@ -389,10 +442,79 @@ export const AdminTournamentManager = () => {
                                  </div>
                              )}
                          </div>
-                      </div>
-                    </div>
+                       </div>
+                     </div>
                   </div>
  
+                  <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
+                     <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                         <Upload className="w-5 h-5 text-emerald-500" /> 
+                         报名配置 (显示在“一键报名”弹窗)
+                     </h4>
+                     
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Contact 1 */}
+                        <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700 space-y-3">
+                           <h5 className="font-bold text-sm text-slate-500 uppercase">报名联系人 #1</h5>
+                           <div>
+                              <label className="text-xs text-slate-500 mb-1 block">姓名/称呼</label>
+                              <input className="w-full input-field text-sm" placeholder="例如: 小王" value={formData.registration_contact1_name || ''} onChange={e => setFormData({...formData, registration_contact1_name: e.target.value})} />
+                           </div>
+                           <div>
+                              <label className="text-xs text-slate-500 mb-1 block">微信号 (可选)</label>
+                              <input className="w-full input-field text-sm" placeholder="例如: wxid_123" value={formData.registration_contact1_wechat || ''} onChange={e => setFormData({...formData, registration_contact1_wechat: e.target.value})} />
+                           </div>
+                           <div>
+                              <label className="text-xs text-slate-500 mb-1 block">二维码</label>
+                              <div className="flex items-center gap-3">
+                                  {formData.registration_contact1_qr ? (
+                                      <div className="relative group">
+                                          <img src={formData.registration_contact1_qr} className="w-16 h-16 rounded border bg-white object-contain" />
+                                          <button type="button" onClick={() => setFormData({...formData, registration_contact1_qr: ''})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow"><X className="w-3 h-3" /></button>
+                                      </div>
+                                  ) : (
+                                      <div className="w-16 h-16 bg-slate-200 dark:bg-slate-600 rounded flex items-center justify-center text-xs text-slate-400">无图片</div>
+                                  )}
+                                  <label className={`px-3 py-1.5 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded text-xs cursor-pointer hover:bg-slate-50 ${uploadingQR === 'registration_contact1_qr' ? 'opacity-50' : ''}`}>
+                                      {uploadingQR === 'registration_contact1_qr' ? '上传中...' : '上传二维码'}
+                                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleQRUpload(e, 'registration_contact1_qr')} disabled={!!uploadingQR} />
+                                  </label>
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Contact 2 */}
+                        <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700 space-y-3">
+                           <h5 className="font-bold text-sm text-slate-500 uppercase">报名联系人 #2 (可选)</h5>
+                           <div>
+                              <label className="text-xs text-slate-500 mb-1 block">姓名/称呼</label>
+                              <input className="w-full input-field text-sm" placeholder="例如: 小李" value={formData.registration_contact2_name || ''} onChange={e => setFormData({...formData, registration_contact2_name: e.target.value})} />
+                           </div>
+                           <div>
+                              <label className="text-xs text-slate-500 mb-1 block">微信号 (可选)</label>
+                              <input className="w-full input-field text-sm" placeholder="例如: wxid_456" value={formData.registration_contact2_wechat || ''} onChange={e => setFormData({...formData, registration_contact2_wechat: e.target.value})} />
+                           </div>
+                           <div>
+                              <label className="text-xs text-slate-500 mb-1 block">二维码</label>
+                              <div className="flex items-center gap-3">
+                                  {formData.registration_contact2_qr ? (
+                                      <div className="relative group">
+                                          <img src={formData.registration_contact2_qr} className="w-16 h-16 rounded border bg-white object-contain" />
+                                          <button type="button" onClick={() => setFormData({...formData, registration_contact2_qr: ''})} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow"><X className="w-3 h-3" /></button>
+                                      </div>
+                                  ) : (
+                                      <div className="w-16 h-16 bg-slate-200 dark:bg-slate-600 rounded flex items-center justify-center text-xs text-slate-400">无图片</div>
+                                  )}
+                                  <label className={`px-3 py-1.5 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded text-xs cursor-pointer hover:bg-slate-50 ${uploadingQR === 'registration_contact2_qr' ? 'opacity-50' : ''}`}>
+                                      {uploadingQR === 'registration_contact2_qr' ? '上传中...' : '上传二维码'}
+                                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleQRUpload(e, 'registration_contact2_qr')} disabled={!!uploadingQR} />
+                                  </label>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
                   <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
                      <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                          <Trophy className="w-5 h-5 text-amber-500" /> 
