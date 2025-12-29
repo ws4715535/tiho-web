@@ -20,6 +20,7 @@ interface Tournament {
   rewards_desc: string;
   sort_order: number;
   pdf_url?: string;
+  doc_link?: string;
   registration_contact1_name?: string;
   registration_contact1_wechat?: string;
   registration_contact1_qr?: string;
@@ -59,6 +60,7 @@ export const AdminTournamentManager = () => {
     rewards_desc: '',
     sort_order: 0,
     pdf_url: '',
+    doc_link: '',
     registration_contact1_name: '',
     registration_contact1_wechat: '',
     registration_contact1_qr: '',
@@ -110,6 +112,7 @@ export const AdminTournamentManager = () => {
         rewards_desc: '',
         sort_order: 0,
         pdf_url: '',
+        doc_link: '',
         registration_contact1_name: '',
         registration_contact1_wechat: '',
         registration_contact1_qr: '',
@@ -435,16 +438,26 @@ export const AdminTournamentManager = () => {
                              </div>
                              
                              {formData.pdf_url && (
-                                 <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-100 dark:border-emerald-900/30 text-sm">
-                                     <FileText className="w-4 h-4" />
-                                     <span className="truncate max-w-[200px]">已上传文档</span>
-                                     <button type="button" onClick={() => setFormData({...formData, pdf_url: ''})} className="ml-auto hover:text-red-500"><X className="w-4 h-4" /></button>
-                                 </div>
-                             )}
-                         </div>
+                                  <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-100 dark:border-emerald-900/30 text-sm">
+                                      <FileText className="w-4 h-4" />
+                                      <span className="truncate max-w-[200px]">已上传文档</span>
+                                      <button type="button" onClick={() => setFormData({...formData, pdf_url: ''})} className="ml-auto hover:text-red-500"><X className="w-4 h-4" /></button>
+                                  </div>
+                              )}
+                          </div>
+                       </div>
+
+                       <div>
+                          <label className="form-label">在线文档链接 (可选)</label>
+                          <input 
+                            className="w-full input-field text-sm" 
+                            placeholder="例如: https://docs.google.com/..." 
+                            value={formData.doc_link || ''} 
+                            onChange={e => setFormData({...formData, doc_link: e.target.value})} 
+                          />
                        </div>
                      </div>
-                  </div>
+                   </div>
  
                   <div className="border-t border-slate-100 dark:border-slate-700 pt-6">
                      <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">

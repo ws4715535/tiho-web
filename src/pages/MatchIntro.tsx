@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Calendar, Sparkles, User, Users, Loader2, FileText, Download, QrCode, X, Copy, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Trophy, Calendar, Sparkles, User, Users, Loader2, FileText, Download, QrCode, X, Copy, CheckCircle, ExternalLink } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase/client';
 
@@ -18,6 +18,7 @@ interface Tournament {
   banner_gradient_from: string;
   banner_gradient_to: string;
   pdf_url?: string;
+  doc_link?: string;
   registration_contact1_name?: string;
   registration_contact1_wechat?: string;
   registration_contact1_qr?: string;
@@ -301,29 +302,53 @@ export const MatchIntro = () => {
             </div>
           </div>
 
-          {tournament.pdf_url && (
+          {(tournament.pdf_url || tournament.doc_link) && (
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
                 <span className="w-1 h-5 bg-emerald-500 rounded-full"></span>
                 详细规则说明书
               </h3>
-              <a 
-                href={tournament.pdf_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="group flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white text-sm">赛事手册 PDF</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">点击在线阅读或下载</div>
-                  </div>
-                </div>
-                <Download className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
-              </a>
+              <div className="space-y-3">
+                {tournament.pdf_url && (
+                    <a 
+                        href={tournament.pdf_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                            <FileText className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div className="font-bold text-slate-900 dark:text-white text-sm">赛事手册 PDF</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">点击在线阅读或下载</div>
+                        </div>
+                        </div>
+                        <Download className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                    </a>
+                )}
+                
+                {tournament.doc_link && (
+                    <a 
+                        href={tournament.doc_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                            <ExternalLink className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div className="font-bold text-slate-900 dark:text-white text-sm">在线文档链接</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">点击跳转至外部文档</div>
+                        </div>
+                        </div>
+                        <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors rotate-180" />
+                    </a>
+                )}
+              </div>
             </div>
           )}
         </div>
