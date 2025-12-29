@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trophy, Calendar, Sparkles, User, Users, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Calendar, Sparkles, User, Users, Loader2, FileText, Download } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase/client';
 
@@ -17,6 +17,7 @@ interface Tournament {
   rewards_desc: string;
   banner_gradient_from: string;
   banner_gradient_to: string;
+  pdf_url?: string;
 }
 
 export const MatchIntro = () => {
@@ -161,6 +162,32 @@ export const MatchIntro = () => {
                 {tournament.rewards_desc || '待定'}
             </div>
           </div>
+
+          {tournament.pdf_url && (
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                <span className="w-1 h-5 bg-emerald-500 rounded-full"></span>
+                详细规则说明书
+              </h3>
+              <a 
+                href={tournament.pdf_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 dark:text-white text-sm">赛事手册 PDF</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">点击在线阅读或下载</div>
+                  </div>
+                </div>
+                <Download className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors" />
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

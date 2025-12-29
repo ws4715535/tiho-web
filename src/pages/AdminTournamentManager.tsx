@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Edit2, Trophy, Save, X, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, Trophy, Save, X, Loader2, RefreshCw, Upload, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase/client';
@@ -19,6 +19,7 @@ interface Tournament {
   rules_desc: string;
   rewards_desc: string;
   sort_order: number;
+  pdf_url?: string;
 }
 
 export const AdminTournamentManager = () => {
@@ -27,6 +28,7 @@ export const AdminTournamentManager = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   
   // Colors for picker
   const GRADIENT_COLORS = [
@@ -48,7 +50,8 @@ export const AdminTournamentManager = () => {
     match_time_desc: '',
     rules_desc: '',
     rewards_desc: '',
-    sort_order: 0
+    sort_order: 0,
+    pdf_url: ''
   });
 
   const fetchTournaments = async () => {
@@ -92,10 +95,45 @@ export const AdminTournamentManager = () => {
         match_time_desc: '',
         rules_desc: '',
         rewards_desc: '',
-        sort_order: 0
+        sort_order: 0,
+        pdf_url: ''
       });
     }
     setIsModalOpen(true);
+  };
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    // Simple validation
+    if (file.type !== 'application/pdf') {
+      alert('请上传 PDF 格式的文件');
+      return;
+    }
+
+    setUploadingPdf(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `tournament_doc_${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('tournament_docs')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('tournament_docs')
+        .getPublicUrl(fileName);
+
+      setFormData(prev => ({ ...prev, pdf_url: data.publicUrl }));
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('上传失败: ' + (err as Error).message);
+    } finally {
+      setUploadingPdf(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -329,6 +367,28 @@ export const AdminTournamentManager = () => {
                       <div>
                          <label className="form-label">规则描述</label>
                          <textarea className="w-full input-field h-24 resize-none" value={formData.rules_desc} onChange={e => setFormData({...formData, rules_desc: e.target.value})} />
+                      </div>
+
+                      <div>
+                         <label className="form-label">赛事手册 PDF</label>
+                         <div className="flex flex-col gap-2">
+                             <div className="flex items-center gap-3">
+                                <label className={`flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-lg cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors ${uploadingPdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                    {uploadingPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                    <span className="text-sm font-medium">上传 PDF</span>
+                                    <input type="file" className="hidden" accept="application/pdf" onChange={handlePdfUpload} disabled={uploadingPdf} />
+                                </label>
+                                <span className="text-xs text-slate-500">仅支持 PDF 格式</span>
+                             </div>
+                             
+                             {formData.pdf_url && (
+                                 <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg border border-emerald-100 dark:border-emerald-900/30 text-sm">
+                                     <FileText className="w-4 h-4" />
+                                     <span className="truncate max-w-[200px]">已上传文档</span>
+                                     <button type="button" onClick={() => setFormData({...formData, pdf_url: ''})} className="ml-auto hover:text-red-500"><X className="w-4 h-4" /></button>
+                                 </div>
+                             )}
+                         </div>
                       </div>
                     </div>
                   </div>

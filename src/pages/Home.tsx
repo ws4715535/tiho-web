@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Loader2, Heart } from 'lucide-react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import tihoLogo from '../assets/tiho_logo.png';
 import { preloadMoMoData } from '../services/momoService';
@@ -28,6 +28,27 @@ export const Home = () => {
 
   useEffect(() => {
     const fetchBanners = async () => {
+      // 1. Try to load from cache
+      const CACHE_KEY = 'tiho_banners_cache';
+      const CACHE_EXPIRY = 10 * 60 * 1000; // 10 minutes
+
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_EXPIRY) {
+            setBanners(data);
+            setLoadingBanners(false);
+            // Optionally still fetch in background to update cache? 
+            // For now, trust cache to avoid flicker.
+            return; 
+          }
+        }
+      } catch (e) {
+        console.error('Cache parse error', e);
+      }
+
+      // 2. Fetch from network
       try {
         const { data, error } = await supabase
           .from('tournaments')
@@ -49,14 +70,13 @@ export const Home = () => {
             type: t.type
           }));
           setBanners(mappedBanners);
+          
+          // Save to cache
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            data: mappedBanners,
+            timestamp: Date.now()
+          }));
         } else {
-          // Fallback to static if no data in DB (or keep empty if preferred, but user wants end-to-end, so let's stick to DB)
-          // If DB is empty, show nothing or default? 
-          // Let's provide a default strictly for demo if empty, or just empty.
-          // User asked to configure via admin. If admin is empty, home is empty.
-          // But I should probably seed the DB with at least one tournament so the home page isn't broken/empty initially.
-          // However, I can't easily seed without SQL.
-          // I'll stick to empty array if fetch returns empty.
           setBanners([]);
         }
       } catch (err) {
@@ -162,8 +182,25 @@ export const Home = () => {
 
       {/* Match Banners Carousel */}
       {loadingBanners ? (
-        <div className="w-full h-48 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+        <div className="w-full h-48 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse relative overflow-hidden p-6 border border-slate-200 dark:border-slate-700">
+             {/* Gradient hint */}
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-slate-200 dark:bg-slate-700 blur-2xl"></div>
+            
+            <div className="relative z-10 flex items-center justify-between h-full">
+                <div className="space-y-4 w-2/3">
+                    {/* Badge Skeleton */}
+                    <div className="h-6 w-24 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                    {/* Title Skeleton */}
+                    <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+                    {/* Desc Skeleton */}
+                    <div className="space-y-2">
+                        <div className="h-4 w-full max-w-xs bg-slate-200 dark:bg-slate-700 rounded"></div>
+                        <div className="h-4 w-2/3 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                    </div>
+                </div>
+                {/* Icon Skeleton */}
+                <div className="hidden sm:block h-16 w-16 bg-slate-200 dark:bg-slate-700 rounded-full mr-8"></div>
+            </div>
         </div>
       ) : banners.length > 0 ? (
       <div className="relative group/carousel">
