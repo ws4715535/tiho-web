@@ -1,1 +1,27 @@
-{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "headers": [
+    {
+      "source": "/521e2283fee4634d0036b9e02c4b59cb.txt",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
+        },
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/521e2283fee4634d0036b9e02c4b59cb.txt",
+      "destination": "/521e2283fee4634d0036b9e02c4b59cb.txt"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
