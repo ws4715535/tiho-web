@@ -1,39 +1,24 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from 'tailwind-merge';
+import { getSeasonRule } from '../constants/season';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Helper to format date as YYYY-MM-DD using local time
+function toLocalDateString(date: Date): string {
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, '0');
+    const d = date.getDate().toString().padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
 /**
  * 计算指定月份包含的比赛周数量
- * 规则：比赛周结束日期（周四）所在的月份决定该周归属的月份
- * 
- * 逻辑：
- * 1. 找到该月1号
- * 2. 如果1号是周五/周六/周日/周一/周二/周三/周四？
- *    比赛周定义：周五开始，下周四结束。
- *    归属判定：如果周四落在本月，则该周属于本月。
- * 
- * 反向推导：
- * 找到本月所有的周四。
- * 每一个在本月的周四，都对应一个属于本月的比赛周。
- * 
- * 例如：
- * 2025年12月
- * 1号是周一。
- * 第一个周四是 12月4日。这是本月第1个比赛周的结束日。
- * (起始日是 11月28日周五，但因为结束日12.4在本月，所以归属12月第1周)
- * 
- * 第二个周四 12月11日 -> 第2周
- * 第三个周四 12月18日 -> 第3周
- * 第四个周四 12月25日 -> 第4周
- * 
- * 下一个周四是 1月1日 -> 属于1月，不属于12月。
- * 
- * 所以本月有4个周。
  */
 export function getWeeksInMonth(year: number, month: number): number {
+  const rule = getSeasonRule(year);
   const weeks: Date[] = [];
   
   // Start from the 1st day of the month
@@ -41,38 +26,80 @@ export function getWeeksInMonth(year: number, month: number): number {
   
   // Loop through the whole month
   while (d.getMonth() === month - 1) {
-    // If it's Thursday (4), it's a match week ending day for this month
-    if (d.getDay() === 4) {
-      weeks.push(new Date(d));
+    // Check if current day is settlement day (e.g., Thu for 2025, Sun for 2026)
+    if (d.getDay() === rule.settlementDay) {
+        // Check if this date is excluded
+        const dateStr = toLocalDateString(d);
+        if (!rule.excludedSettlementDates?.includes(dateStr)) {
+            weeks.push(new Date(d));
+        }
     }
     d.setDate(d.getDate() + 1);
+  }
+
+  // Special check for 2025-12 (to include the 5th week manually if not detected by standard logic)
+  if (year === 2025 && month === 12 && weeks.length === 4) {
+      // Add a dummy date for 5th week, the actual date range logic is handled in calculateWeekRange
+      weeks.push(new Date(2025, 11, 31)); 
   }
   
   return weeks.length;
 }
 
 export function calculateWeekRange(year: number, month: number, week: number): { startDate: Date, endDate: Date } {
-  // Logic: Find the Nth Thursday of the month (which is the End Date)
-  // Then subtract 6 days to get Start Date (Friday)
-  
+  const rule = getSeasonRule(year);
+
+  // Check for special week configuration
+  const specialKey = `${year}-${month}-${week}`;
+  if (rule.specialWeeks && rule.specialWeeks[specialKey]) {
+      const config = rule.specialWeeks[specialKey];
+      const startDate = new Date(config.startDate);
+      const endDate = new Date(config.endDate);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      return { startDate, endDate };
+  }
+
+  // Standard Logic
   const firstDay = new Date(year, month - 1, 1);
-  let firstThursday = new Date(firstDay);
+  let firstSettlementDay = new Date(firstDay);
   
-  // Find the first Thursday of the month
-  // (This corresponds to Week 1's end date)
-  while (firstThursday.getDay() !== 4) {
-    firstThursday.setDate(firstThursday.getDate() + 1);
+  // Find the first settlement day of the month
+  while (firstSettlementDay.getDay() !== rule.settlementDay) {
+    firstSettlementDay.setDate(firstSettlementDay.getDate() + 1);
+  }
+
+  // Let's iterate to find the Nth valid settlement day
+  let currentSettlementDay = new Date(year, month - 1, 1);
+  while (currentSettlementDay.getDay() !== rule.settlementDay) {
+      currentSettlementDay.setDate(currentSettlementDay.getDate() + 1);
+  }
+
+  // Now currentSettlementDay is the first calendar settlement day.
+  // We need to loop until we find the 'week'-th valid settlement day.
+  
+  let validWeeksCount = 0;
+  while (validWeeksCount < week) {
+      const dateStr = toLocalDateString(currentSettlementDay);
+      if (!rule.excludedSettlementDates?.includes(dateStr)) {
+          validWeeksCount++;
+      }
+      
+      if (validWeeksCount === week) {
+          break;
+      }
+      
+      // Move to next week
+      currentSettlementDay.setDate(currentSettlementDay.getDate() + 7);
   }
   
-  // Calculate Nth Thursday (End Date)
-  const endDate = new Date(firstThursday);
-  endDate.setDate(firstThursday.getDate() + (week - 1) * 7);
-  // Set end date to end of day
+  // Now currentSettlementDay is the End Date
+  const endDate = new Date(currentSettlementDay);
   endDate.setHours(23, 59, 59, 999);
   
-  // Calculate Start Date (6 days before End Date)
+  // Calculate Start Date
   const startDate = new Date(endDate);
-  startDate.setDate(endDate.getDate() - 6);
+  startDate.setDate(endDate.getDate() - rule.durationDays);
   // Set start date to beginning of day
   startDate.setHours(0, 0, 0, 0);
 

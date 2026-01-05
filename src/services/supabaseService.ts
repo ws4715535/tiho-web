@@ -2,7 +2,7 @@ import { Raw } from './data';
 import supabase from '../lib/supabase/client';
 import { Competitor } from '../types';
 import { getStoreConfig } from '../constants/stores';
-import { getWeekDateRange, calculateWeekRange } from '../lib/utils';
+import { getWeekDateRange, calculateWeekRange, getWeeksInMonth } from '../lib/utils';
 
 // Configuration for database tables and functions
 // Best practice: Use environment variables to control this (e.g. import.meta.env.VITE_TABLE_PREFIX)
@@ -322,8 +322,9 @@ export const fetchRankData = async (
     // 2. Get Date Range
     let dateRange = '';
     if (week === 'Monthly') {
+        const totalWeeks = getWeeksInMonth(year, month);
         const { startDate } = calculateWeekRange(year, month, 1);
-        const { endDate } = calculateWeekRange(year, month, 4);
+        const { endDate } = calculateWeekRange(year, month, totalWeeks);
         
         const formatDate = (d: Date) => {
           const y = d.getFullYear();

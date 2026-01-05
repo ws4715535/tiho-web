@@ -8,8 +8,9 @@ import { DetailModal } from '../components/DetailModal';
 import { TeamDetailModal } from '../components/TeamDetailModal';
 import { fetchRankData, fetchExternalRankData } from '../services/supabaseService';
 import { fetchAllTeams, updateTeamRankingDB } from '../services/teamService';
-import { getWeekDateRange, calculateWeekRange } from '../lib/utils';
+import { getWeekDateRange, calculateWeekRange, getWeeksInMonth } from '../lib/utils';
 import { Competitor, RankCategory, Arena } from '../types';
+import { getSeasonRule } from '../constants/season';
 
 export const RankList = () => {
   // State Initializers that run once on mount
@@ -96,10 +97,12 @@ export const RankList = () => {
                 return;
             }
 
+            // 2. Get Date Range
             let dateRange = '';
             if (week === 'Monthly') {
+                const totalWeeks = getWeeksInMonth(parsed.year, parsed.month);
                 const { startDate } = calculateWeekRange(parsed.year, parsed.month, 1);
-                const { endDate } = calculateWeekRange(parsed.year, parsed.month, 4);
+                const { endDate } = calculateWeekRange(parsed.year, parsed.month, totalWeeks);
                 
                 const formatDate = (d: Date) => {
                   const y = d.getFullYear();
@@ -312,9 +315,23 @@ export const RankList = () => {
     return listData;
   }, [list, searchTerm]);
 
+  // Extract year from month string for rule lookup
+  const currentYear = useMemo(() => {
+    const mm = month.match(/^(\d{4})年/);
+    return mm ? parseInt(mm[1]) : new Date().getFullYear();
+  }, [month]);
+
+  const settlementDayText = useMemo(() => {
+    const rule = getSeasonRule(currentYear);
+    // 0=周日, 1=周一... 4=周四
+    const days = ['日', '一', '二', '三', '四', '五', '六'];
+    return `每周${days[rule.settlementDay]}截止统计`;
+  }, [currentYear]);
+
   return (
     <>
       <div className="mb-6">
+         {/* ... existing headers ... */}
          <div className="flex items-baseline space-x-2">
               <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
                   积分榜
@@ -332,13 +349,31 @@ export const RankList = () => {
                      💡 赛区切换不影响团队排名，团队分为全赛区累计。
                  </span>
              )}
-             结算规则：每周四截止统计。
-             {week !== 'Monthly' && (() => {
+             结算规则：{settlementDayText}。
+             {(() => {
                const mm = month.match(/^(\d{4})年(\d{1,2})月$/);
                if (mm) {
                  const year = parseInt(mm[1]);
                  const monthNum = parseInt(mm[2]);
-                 return ` 本期时间（北京时间）：${getWeekDateRange(year, monthNum, week as number)}`;
+                 let dateText = '';
+                 
+                 if (week === 'Monthly') {
+                    const totalWeeks = getWeeksInMonth(year, monthNum);
+                    const { startDate } = calculateWeekRange(year, monthNum, 1);
+                    const { endDate } = calculateWeekRange(year, monthNum, totalWeeks);
+                    
+                    const formatDate = (d: Date) => {
+                      const y = d.getFullYear();
+                      const m = (d.getMonth() + 1).toString().padStart(2, '0');
+                      const dd = d.getDate().toString().padStart(2, '0');
+                      return `${y}/${m}/${dd}`;
+                    };
+                    dateText = `${formatDate(startDate)} - ${formatDate(endDate)}`;
+                 } else {
+                    dateText = getWeekDateRange(year, monthNum, week as number);
+                 }
+                 
+                 return ` 本期时间（北京时间）：${dateText}`;
                }
                return '';
              })()}
