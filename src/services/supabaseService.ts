@@ -34,6 +34,28 @@ export interface RankResponseItem {
   avatar_url?: string;
 }
 
+export const uploadImage = async (file: File, bucket: string = 'community_settings'): Promise<string> => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `team_avatar_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  } catch (error) {
+    console.error('Failed to upload image:', error);
+    throw error;
+  }
+};
+
 export const fetchRawRankData = async (
   year: number,
   month: number,

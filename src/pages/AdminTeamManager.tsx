@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Edit2, Users, Save, X, Loader2, RefreshCw, Image as ImageIcon, Database } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, Users, Save, X, Loader2, RefreshCw, Image as ImageIcon, Database, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { fetchAllTeams, createTeam, updateTeam, deleteTeam, syncTeamScores, type PairedTeam } from '../services/teamService';
+import { uploadImage } from '../services/supabaseService';
 
 export const AdminTeamManager = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export const AdminTeamManager = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   // Form State
   const [currentId, setCurrentId] = useState<string | null>(null);
@@ -79,6 +81,29 @@ export const AdminTeamManager = () => {
       });
     }
     setIsModalOpen(true);
+  };
+
+  // Handle Avatar Upload
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+        alert('请上传图片文件');
+        return;
+    }
+    
+    setUploadingAvatar(true);
+    try {
+        const publicUrl = await uploadImage(file);
+        setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+    } catch (err) {
+        console.error('Avatar upload failed:', err);
+        alert('头像上传失败: ' + (err instanceof Error ? err.message : '未知错误'));
+    } finally {
+        setUploadingAvatar(false);
+    }
   };
 
   // Handle Submit
@@ -308,15 +333,27 @@ export const AdminTeamManager = () => {
                                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                                     头像 URL
                                 </label>
-                                <div className="relative">
-                                    <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                    <input 
-                                        type="url" 
-                                        value={formData.avatar_url}
-                                        onChange={e => setFormData({...formData, avatar_url: e.target.value})}
-                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                                        placeholder="https://..."
-                                    />
+                                <div className="flex gap-2">
+                                    <div className="relative flex-1">
+                                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                        <input 
+                                            type="url" 
+                                            value={formData.avatar_url}
+                                            onChange={e => setFormData({...formData, avatar_url: e.target.value})}
+                                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                            placeholder="https://..."
+                                        />
+                                    </div>
+                                    <label className={`flex items-center justify-center px-4 py-2.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors ${uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                        {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin text-indigo-500" /> : <Upload className="w-5 h-5 text-slate-500 dark:text-slate-400" />}
+                                        <input 
+                                            type="file" 
+                                            className="hidden" 
+                                            accept="image/*"
+                                            onChange={handleAvatarUpload}
+                                            disabled={uploadingAvatar}
+                                        />
+                                    </label>
                                 </div>
                                 {formData.avatar_url && (
                                     <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
