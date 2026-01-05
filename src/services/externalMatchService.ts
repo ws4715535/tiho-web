@@ -41,8 +41,8 @@ export interface ExternalApiResponse {
 const API_URL = 'https://gsz.rmlinking.com/gszapi/customer/raterecord/page';
 
 export const STORES = {
-  UNIVERSITY_TOWN: '562',
-  LIJIACUN: '167'
+  UNIVERSITY_TOWN: '127',
+  LIJIACUN: '30'
 };
 
 export const externalMatchService = {

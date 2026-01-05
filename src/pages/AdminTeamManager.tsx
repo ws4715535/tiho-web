@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Edit2, Users, Save, X, Loader2, RefreshCw, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, Users, Save, X, Loader2, RefreshCw, Image as ImageIcon, Database } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { fetchAllTeams, createTeam, updateTeam, deleteTeam, type PairedTeam } from '../services/teamService';
+import { fetchAllTeams, createTeam, updateTeam, deleteTeam, syncTeamScores, type PairedTeam } from '../services/teamService';
 
 export const AdminTeamManager = () => {
   const navigate = useNavigate();
   const [teams, setTeams] = useState<PairedTeam[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Form State
@@ -38,6 +39,23 @@ export const AdminTeamManager = () => {
   useEffect(() => {
     loadTeams();
   }, []);
+
+  // Handle Sync Scores
+  const handleSyncScores = async () => {
+    if (!confirm('确定要从外部数据源同步本周积分吗？这可能需要几秒钟。')) return;
+    
+    setSyncing(true);
+    try {
+      await syncTeamScores();
+      await loadTeams(); // Reload to show new scores
+      alert('积分同步完成！');
+    } catch (err) {
+      console.error('Sync failed:', err);
+      alert('同步失败，请查看控制台日志');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   // Open Modal
   const openModal = (team?: PairedTeam) => {
@@ -133,6 +151,16 @@ export const AdminTeamManager = () => {
                 className="text-slate-500"
             >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button 
+                variant="outline"
+                size="sm" 
+                onClick={handleSyncScores} 
+                disabled={syncing || loading}
+                className="flex items-center gap-1 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+            >
+                <Database className={`w-4 h-4 ${syncing ? 'animate-pulse' : ''}`} />
+                {syncing ? '同步中...' : '同步积分'}
             </Button>
             <Button size="sm" onClick={() => openModal()} className="flex items-center gap-1 shadow-lg shadow-indigo-500/20">
                 <Plus className="w-4 h-4" />

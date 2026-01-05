@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Competitor } from '../types';
 import { X, Users } from 'lucide-react';
 
@@ -8,12 +8,14 @@ interface TeamDetailModalProps {
 }
 
 export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose }) => {
-  if (!data || !data.members || data.members.length < 2) return null;
+  if (!data || !data.member1 || !data.member2) return null;
   
-  const [member1] = useState(data.members[0]);
-  const [member2] = useState(data.members[1]);
+  const m1Name = data.member1;
+  const m2Name = data.member2;
+  const m1StatsData = data.member1Stats;
+  const m2StatsData = data.member2Stats;
 
-  // Mock individual data derived from team data for demo purposes
+  // Mock individual data derived from team data for demo purposes (Radar chart still mocked for now as we don't have detailed trait stats)
   // In real app, these should come from API
   const generateMemberStats = (seed: number) => {
     return {
@@ -25,11 +27,11 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
     };
   };
 
-  const m1Stats = generateMemberStats(data.totalScore);
-  const m2Stats = generateMemberStats(data.totalScore + 123);
+  const m1Radar = generateMemberStats(data.totalScore);
+  const m2Radar = generateMemberStats(data.totalScore + 123);
   
-  const m1Score = member1.score ?? 0;
-  const m2Score = member2.score ?? 0;
+  const m1Score = m1StatsData?.totalPT ?? 0;
+  const m2Score = m2StatsData?.totalPT ?? 0;
   
   const getContribution = (score: number, total: number) => {
     if (total === 0) return 0;
@@ -59,10 +61,10 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
     return [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
   };
 
-  const m1Points = [m1Stats.top2, m1Stats.momentum, m1Stats.efficiency, m1Stats.ceiling, m1Stats.resilience]
+  const m1Points = [m1Radar.top2, m1Radar.momentum, m1Radar.efficiency, m1Radar.ceiling, m1Radar.resilience]
     .map((v, i) => toPoint(v, i)).map(p => p.join(',')).join(' ');
     
-  const m2Points = [m2Stats.top2, m2Stats.momentum, m2Stats.efficiency, m2Stats.ceiling, m2Stats.resilience]
+  const m2Points = [m2Radar.top2, m2Radar.momentum, m2Radar.efficiency, m2Radar.ceiling, m2Radar.resilience]
     .map((v, i) => toPoint(v, i)).map(p => p.join(',')).join(' ');
 
   const rings = [0.25, 0.5, 0.75, 1];
@@ -155,7 +157,7 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                 <div className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-center">
                     <div className="text-xs text-slate-500 uppercase tracking-widest mb-1">被飞率</div>
                     <div className="text-xl font-bold text-slate-800 dark:text-white">
-                        {data.dealInRate}%
+                        {data.flyRate ?? 0}%
                     </div>
                 </div>
             </div>
@@ -168,11 +170,11 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                         <div className="flex gap-3 text-[10px] font-bold">
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                                <span className="text-slate-600 dark:text-slate-300">{member1.name}</span>
+                                <span className="text-slate-600 dark:text-slate-300">{m1Name}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-pink-500"></span>
-                                <span className="text-slate-600 dark:text-slate-300">{member2.name}</span>
+                                <span className="text-slate-600 dark:text-slate-300">{m2Name}</span>
                             </div>
                         </div>
                     </div>
@@ -212,10 +214,10 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-sm font-bold text-cyan-600 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800">
-                                {member1.avatarStr}
+                                {m1Name.charAt(0)}
                             </div>
                             <div>
-                                <div className="font-bold text-slate-900 dark:text-white text-sm">{member1.name}</div>
+                                <div className="font-bold text-slate-900 dark:text-white text-sm">{m1Name}</div>
                                 <div className="text-[10px] text-slate-500 flex items-center gap-1">
                                     贡献度: <span className={getScoreColor(m1Contribution)}>{m1Contribution}%</span>
                                     <span className={`font-mono ${getScoreColor(m1Score)}`}>({m1Score > 0 ? '+' : ''}{m1Score})</span>
@@ -226,19 +228,19 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                     <div className="grid grid-cols-4 gap-2 border-t border-slate-100 dark:border-slate-700 pt-3">
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">对局</div>
-                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{member1.gamesPlayed ?? '-'}</div>
+                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{m1StatsData?.gamesPlayed ?? '-'}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">一位率</div>
-                            <div className="font-mono font-bold text-cyan-600 dark:text-cyan-400 text-xs">{member1.winRate ?? '-'}%</div>
+                            <div className="font-mono font-bold text-cyan-600 dark:text-cyan-400 text-xs">{m1StatsData?.winRate ?? '-'}%</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">均顺</div>
-                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{member1.avgOrder ?? '-'}</div>
+                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{m1StatsData?.avgOrder ?? '-'}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">被飞率</div>
-                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{member1.dealInRate ?? '-'}%</div>
+                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{m1StatsData?.flyRate ?? '-'}%</div>
                         </div>
                     </div>
                 </div>
@@ -248,10 +250,10 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center text-sm font-bold text-pink-600 dark:text-pink-400 border border-pink-200 dark:border-pink-800">
-                                {member2.avatarStr}
+                                {m2Name.charAt(0)}
                             </div>
                             <div>
-                                <div className="font-bold text-slate-900 dark:text-white text-sm">{member2.name}</div>
+                                <div className="font-bold text-slate-900 dark:text-white text-sm">{m2Name}</div>
                                 <div className="text-[10px] text-slate-500 flex items-center gap-1">
                                     贡献度: <span className={getScoreColor(m2Contribution)}>{m2Contribution}%</span>
                                     <span className={`font-mono ${getScoreColor(m2Score)}`}>({m2Score > 0 ? '+' : ''}{m2Score})</span>
@@ -262,19 +264,19 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                     <div className="grid grid-cols-4 gap-2 border-t border-slate-100 dark:border-slate-700 pt-3">
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">对局</div>
-                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{member2.gamesPlayed ?? '-'}</div>
+                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{m2StatsData?.gamesPlayed ?? '-'}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">一位率</div>
-                            <div className="font-mono font-bold text-pink-600 dark:text-pink-400 text-xs">{member2.winRate ?? '-'}%</div>
+                            <div className="font-mono font-bold text-pink-600 dark:text-pink-400 text-xs">{m2StatsData?.winRate ?? '-'}%</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">均顺</div>
-                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{member2.avgOrder ?? '-'}</div>
+                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{m2StatsData?.avgOrder ?? '-'}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-[10px] text-slate-400 mb-0.5">被飞率</div>
-                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{member2.dealInRate ?? '-'}%</div>
+                            <div className="font-mono font-bold text-slate-700 dark:text-slate-200 text-xs">{m2StatsData?.flyRate ?? '-'}%</div>
                         </div>
                     </div>
                 </div>

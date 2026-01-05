@@ -86,22 +86,33 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
             
             {/* Members List (Simplified) */}
             <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">
-                {data.members?.map((member, idx) => {
-                    const score = member.score ?? 0;
-                    const contribution = getContribution(score, data.totalPT);
-                    return (
-                        <React.Fragment key={idx}>
-                            {idx > 0 && <Heart className="w-3 h-3 text-rose-500 fill-current animate-pulse" />}
-                            <div className="flex flex-col items-center">
-                                <span>{member.name}</span>
-                                <div className="flex items-center gap-1 text-[10px]">
-                                    <span className={getScoreColor(contribution)}>{contribution}%</span>
-                                    <span className={`font-mono ${getScoreColor(score)}`}>({score > 0 ? '+' : ''}{score})</span>
-                                </div>
-                            </div>
-                        </React.Fragment>
-                    );
-                })}
+                {/* Member 1 */}
+                <div className="flex flex-col items-center">
+                    <span>{data.member1}</span>
+                    <div className="flex items-center gap-1 text-[10px]">
+                        <span className={getScoreColor(getContribution(data.member1Stats?.totalPT || 0, data.totalPT))}>
+                            {getContribution(data.member1Stats?.totalPT || 0, data.totalPT)}%
+                        </span>
+                        <span className={`font-mono ${getScoreColor(data.member1Stats?.totalPT || 0)}`}>
+                            ({(data.member1Stats?.totalPT || 0) > 0 ? '+' : ''}{data.member1Stats?.totalPT || 0})
+                        </span>
+                    </div>
+                </div>
+
+                <Heart className="w-3 h-3 text-rose-500 fill-current animate-pulse mx-1" />
+
+                {/* Member 2 */}
+                <div className="flex flex-col items-center">
+                    <span>{data.member2}</span>
+                    <div className="flex items-center gap-1 text-[10px]">
+                        <span className={getScoreColor(getContribution(data.member2Stats?.totalPT || 0, data.totalPT))}>
+                            {getContribution(data.member2Stats?.totalPT || 0, data.totalPT)}%
+                        </span>
+                        <span className={`font-mono ${getScoreColor(data.member2Stats?.totalPT || 0)}`}>
+                            ({(data.member2Stats?.totalPT || 0) > 0 ? '+' : ''}{data.member2Stats?.totalPT || 0})
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -138,36 +149,32 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">总对局数</div>
                  <div className="font-bold text-slate-800 dark:text-white">{data.gamesPlayed}</div>
                  <div className="mt-1 flex justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
-                    {data.members?.map((m, i) => (
-                        <span key={i}>{m.name}: {m.gamesPlayed ?? '-'}</span>
-                    ))}
+                    <span>{data.member1}: {data.member1Stats?.gamesPlayed ?? '-'}</span>
+                    <span>{data.member2}: {data.member2Stats?.gamesPlayed ?? '-'}</span>
                  </div>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 text-center">
                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">一位率</div>
                  <div className="font-bold text-slate-800 dark:text-white">{data.winRate}%</div>
                  <div className="mt-1 flex justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
-                    {data.members?.map((m, i) => (
-                        <span key={i}>{m.name}: {m.winRate ?? '-'}%</span>
-                    ))}
+                    <span>{data.member1}: {data.member1Stats?.winRate ?? '-'}%</span>
+                    <span>{data.member2}: {data.member2Stats?.winRate ?? '-'}%</span>
                  </div>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 text-center">
                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">平均顺位</div>
                  <div className="font-bold text-slate-800 dark:text-white">{data.avgOrder}</div>
                  <div className="mt-1 flex justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
-                    {data.members?.map((m, i) => (
-                        <span key={i}>{m.name}: {m.avgOrder ?? '-'}</span>
-                    ))}
+                    <span>{data.member1}: {data.member1Stats?.avgOrder ?? '-'}</span>
+                    <span>{data.member2}: {data.member2Stats?.avgOrder ?? '-'}</span>
                  </div>
             </div>
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 text-center">
                  <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">被飞率</div>
-                 <div className="font-bold text-slate-800 dark:text-white">{data.dealInRate}%</div>
+                 <div className="font-bold text-slate-800 dark:text-white">{data.flyRate}%</div>
                  <div className="mt-1 flex justify-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
-                    {data.members?.map((m, i) => (
-                        <span key={i}>{m.name}: {m.dealInRate ?? '-'}%</span>
-                    ))}
+                    <span>{data.member1}: {data.member1Stats?.flyRate ?? '-'}%</span>
+                    <span>{data.member2}: {data.member2Stats?.flyRate ?? '-'}%</span>
                  </div>
             </div>
          </div>

@@ -1,30 +1,32 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Search } from 'lucide-react';
-import { useState } from 'react';
-import { AVATAR_URLS } from '../constants/avatarUrls';
-
-// Mock full list of registered teams
-// In a real app, this would be fetched from the backend
-const ALL_TEAMS = Array.from({ length: 24 }).map((_, index) => ({
-  id: `team-${index}`,
-  name: [
-    '天和双子星', '岭上开花', '海底捞月', '国士无双', '九莲宝灯',
-    '大三元', '小四喜', '清老头', '字一色', '绿一色',
-    '断幺九', '立直一发', '门前清', '平和', '七对子'
-  ][index % 15] + (index >= 15 ? ` ${index + 1}` : ''),
-  avatar: AVATAR_URLS[index % AVATAR_URLS.length],
-  slogan: '全力以赴，享受比赛！',
-  members: [`队员A${index}`, `队员B${index}`],
-  regTime: '2025-01-01'
-}));
+import { ArrowLeft, Users, Search, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { fetchAllTeams, PairedTeam } from '../services/teamService';
 
 export const TeamList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [teams, setTeams] = useState<PairedTeam[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredTeams = ALL_TEAMS.filter(team => 
-    team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    team.members.some(m => m.toLowerCase().includes(searchTerm.toLowerCase()))
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        const data = await fetchAllTeams();
+        setTeams(data);
+      } catch (err) {
+        console.error('Failed to load teams:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadTeams();
+  }, []);
+
+  const filteredTeams = teams.filter(team => 
+    team.team_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    team.member_1_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    team.member_2_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -58,39 +60,49 @@ export const TeamList = () => {
 
         {/* Stats */}
         <div className="flex items-center justify-between px-2 text-xs text-slate-500 dark:text-slate-400">
-          <span>共 {ALL_TEAMS.length} 支战队报名</span>
-          <span>按报名时间排序</span>
+          <span>共 {teams.length} 支战队报名</span>
+          {/* <span>按积分排序</span> */}
         </div>
 
         {/* Team List Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filteredTeams.map(team => (
-            <div key={team.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-              <img 
-                src={team.avatar} 
-                alt={team.name} 
-                className="w-14 h-14 rounded-xl object-cover border border-slate-100 dark:border-slate-600" 
-              />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-slate-900 dark:text-white truncate mb-1">{team.name}</h3>
-                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    <span>{team.members[0]}</span>
-                  </div>
-                  <span>&</span>
-                  <span>{team.members[1]}</span>
+        {loading ? (
+            <div className="flex justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {filteredTeams.map(team => (
+                <div key={team.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                <img 
+                    src={team.avatar_url || 'https://api.dicebear.com/7.x/shapes/svg?seed=' + team.id} 
+                    alt={team.team_name} 
+                    className="w-14 h-14 rounded-xl object-cover border border-slate-100 dark:border-slate-600" 
+                />
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-slate-900 dark:text-white truncate mb-1">{team.team_name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        <span>{team.member_1_name}</span>
+                    </div>
+                    <span>&</span>
+                    <span>{team.member_2_name}</span>
+                    </div>
+                    {/* Display Score if > 0 */}
+                    {/* <div className="mt-1 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                        {team.total_score > 0 ? `积分: ${team.total_score}` : '暂无积分'}
+                    </div> */}
                 </div>
-              </div>
-            </div>
-          ))}
+                </div>
+            ))}
 
-          {filteredTeams.length === 0 && (
-            <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400">
-              <p>未找到匹配的战队</p>
+            {filteredTeams.length === 0 && (
+                <div className="col-span-full py-12 text-center text-slate-500 dark:text-slate-400">
+                <p>未找到匹配的战队</p>
+                </div>
+            )}
             </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

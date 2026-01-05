@@ -1,24 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, Trophy, Calendar, Sparkles, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { AVATAR_URLS } from '../constants/avatarUrls';
-
-// Mock registered teams data (simplified for intro page)
-const REGISTERED_TEAMS = [
-  { name: '天和双子星', avatar: AVATAR_URLS[0], slogan: '不仅要赢，还要赢得漂亮！', members: ['队员A0', '队员B0'] },
-  { name: '岭上开花', avatar: AVATAR_URLS[1], slogan: '花开富贵，杠上开花。', members: ['队员A1', '队员B1'] },
-  { name: '海底捞月', avatar: AVATAR_URLS[2], slogan: '不到最后一刻决不放弃。', members: ['队员A2', '队员B2'] },
-  { name: '国士无双', avatar: AVATAR_URLS[3], slogan: '十三面听牌，你怕不怕？', members: ['队员A3', '队员B3'] },
-  { name: '九莲宝灯', avatar: AVATAR_URLS[4], slogan: '传说中的役满，即将在我们手中诞生。', members: ['队员A4', '队员B4'] },
-  { name: '大三元', avatar: AVATAR_URLS[5], slogan: '白发中，缺一不可。', members: ['队员A5', '队员B5'] },
-  { name: '小四喜', avatar: AVATAR_URLS[6], slogan: '东西南北，风起云涌。', members: ['队员A6', '队员B6'] },
-  { name: '清老头', avatar: AVATAR_URLS[7], slogan: '只有老头牌才是真理。', members: ['队员A7', '队员B7'] },
-];
+import { fetchAllTeams, PairedTeam } from '../services/teamService';
 
 export const TeamMatchIntro = () => {
   const navigate = useNavigate();
-  const [selectedTeam, setSelectedTeam] = useState<typeof REGISTERED_TEAMS[0] | null>(null);
+  const [teams, setTeams] = useState<PairedTeam[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<PairedTeam | null>(null);
+
+  useEffect(() => {
+    const loadTeams = async () => {
+        try {
+            const data = await fetchAllTeams();
+            // Sort by score desc for preview, take top 8
+            const sorted = [...data].sort((a, b) => b.total_score - a.total_score);
+            setTeams(sorted);
+        } catch (err) {
+            console.error(err);
+        }
+    };
+    loadTeams();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-in fade-in duration-500">
@@ -73,7 +76,7 @@ export const TeamMatchIntro = () => {
               查看战队榜单
             </Button>
             <div className="text-xs text-slate-400 font-mono">
-              已有 24 支战队报名参赛
+              已有 {teams.length} 支战队报名参赛
             </div>
           </div>
         </div>
@@ -139,26 +142,26 @@ export const TeamMatchIntro = () => {
           </div>
           
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-            {REGISTERED_TEAMS.map((team, idx) => (
+            {teams.slice(0, 11).map((team, idx) => (
               <div 
-                key={idx} 
+                key={team.id} 
                 className="flex flex-col items-center gap-2 group cursor-pointer"
                 onClick={() => setSelectedTeam(team)}
               >
                 <div className="relative">
                   <img 
-                    src={team.avatar} 
-                    alt={team.name} 
+                    src={team.avatar_url || 'https://api.dicebear.com/7.x/shapes/svg?seed=' + team.id} 
+                    alt={team.team_name} 
                     className="w-14 h-14 rounded-2xl object-cover shadow-sm border border-slate-200 dark:border-slate-700 group-hover:scale-105 transition-transform" 
                   />
-                  {idx < 3 && (
+                  {idx < 3 && team.total_score > 0 && (
                     <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center">
                         <span className="text-[8px] font-bold text-white">★</span>
                     </div>
                   )}
                 </div>
                 <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium text-center truncate w-full px-1">
-                  {team.name}
+                  {team.team_name}
                 </span>
               </div>
             ))}
@@ -174,8 +177,8 @@ export const TeamMatchIntro = () => {
 
       {/* Team Info Modal */}
       {selectedTeam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-xs rounded-2xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setSelectedTeam(null)}>
+          <div className="bg-white dark:bg-slate-800 w-full max-w-xs rounded-2xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
             <button 
               onClick={() => setSelectedTeam(null)}
               className="absolute top-4 right-4 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
@@ -185,29 +188,38 @@ export const TeamMatchIntro = () => {
             
             <div className="flex flex-col items-center text-center space-y-4">
               <img 
-                src={selectedTeam.avatar} 
-                alt={selectedTeam.name} 
+                src={selectedTeam.avatar_url || 'https://api.dicebear.com/7.x/shapes/svg?seed=' + selectedTeam.id} 
+                alt={selectedTeam.team_name} 
                 className="w-20 h-20 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-slate-700" 
               />
               
               <div>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">{selectedTeam.name}</h3>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-1">{selectedTeam.team_name}</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium italic">
-                  "{selectedTeam.slogan}"
+                  "{selectedTeam.description || '全力以赴！'}"
                 </p>
+                {selectedTeam.total_score !== 0 && (
+                     <div className="mt-2 font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                         积分: {selectedTeam.total_score}
+                     </div>
+                )}
               </div>
 
               <div className="w-full bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3">
                 <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-2">战队成员</div>
                 <div className="flex justify-center gap-4">
-                  {selectedTeam.members.map((member, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5">
                       <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                        {member.charAt(0)}
+                        {selectedTeam.member_1_name.charAt(0)}
                       </div>
-                      <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{member}</span>
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{selectedTeam.member_1_name}</span>
                     </div>
-                  ))}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center text-xs font-bold text-pink-600 dark:text-pink-400">
+                        {selectedTeam.member_2_name.charAt(0)}
+                      </div>
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{selectedTeam.member_2_name}</span>
+                    </div>
                 </div>
               </div>
             </div>
