@@ -228,7 +228,7 @@ export const AdminTeamManager = () => {
                             <div className="text-right">
                                 <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">PT</div>
                                 <div className={`text-xl font-mono font-black ${team.total_score >= 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-rose-500'}`}>
-                                    {team.total_score > 0 ? '+' : ''}{team.total_score}
+                                    {team.total_score > 0 ? '+' : ''}{parseFloat(team.total_score.toFixed(1))}
                                 </div>
                             </div>
                         </div>

@@ -112,7 +112,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({ data, onClose }) => {
                     <div className="mt-2">
                       <span className="text-[10px] text-slate-500 uppercase tracking-widest">总PT</span>
                       <div className={cn("text-2xl font-mono font-bold", data.totalPT > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400')}>
-                        {data.totalPT > 0 ? '+' : ''}{data.totalPT}
+                        {data.totalPT > 0 ? '+' : ''}{parseFloat(data.totalPT.toFixed(1))}
                       </div>
                     </div>
                 </div>

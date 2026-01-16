@@ -95,7 +95,7 @@ export const RankCard: React.FC<RankCardProps> = ({ data, onClick, isTeam }) => 
         <div className="flex items-center space-x-3 sm:space-x-4">
             <div className="text-right">
                 <div className={`text-lg font-mono font-bold tracking-tight ${data.totalPT > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}`}>
-                    {data.totalPT > 0 ? '+' : ''}{data.totalPT}
+                    {data.totalPT > 0 ? '+' : ''}{parseFloat(data.totalPT.toFixed(1))} 
                 </div>
                 <div className="flex items-center justify-end space-x-2 text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                     <span>总局: <span className="text-slate-600 dark:text-slate-200 font-bold">{data.gamesPlayed}</span></span>

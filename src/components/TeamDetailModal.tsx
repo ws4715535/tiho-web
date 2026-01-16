@@ -133,7 +133,7 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-center col-span-2">
                     <div className="text-xs text-slate-500 uppercase tracking-widest mb-1">总积分</div>
                     <div className={`text-4xl font-black font-mono ${data.totalPT > 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                        {data.totalPT > 0 ? '+' : ''}{data.totalPT}
+                        {data.totalPT > 0 ? '+' : ''}{parseFloat(data.totalPT.toFixed(1))}
                     </div>
                 </div>
                 <div className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-center">
@@ -220,7 +220,7 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                                 <div className="font-bold text-slate-900 dark:text-white text-sm">{m1Name}</div>
                                 <div className="text-[10px] text-slate-500 flex items-center gap-1">
                                     贡献度: <span className={getScoreColor(m1Contribution)}>{m1Contribution}%</span>
-                                    <span className={`font-mono ${getScoreColor(m1Score)}`}>({m1Score > 0 ? '+' : ''}{m1Score})</span>
+                                    <span className={`font-mono ${getScoreColor(m1Score)}`}>({m1Score > 0 ? '+' : ''}{parseFloat(m1Score.toFixed(1))})</span>
                                 </div>
                             </div>
                         </div>
@@ -256,7 +256,7 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
                                 <div className="font-bold text-slate-900 dark:text-white text-sm">{m2Name}</div>
                                 <div className="text-[10px] text-slate-500 flex items-center gap-1">
                                     贡献度: <span className={getScoreColor(m2Contribution)}>{m2Contribution}%</span>
-                                    <span className={`font-mono ${getScoreColor(m2Score)}`}>({m2Score > 0 ? '+' : ''}{m2Score})</span>
+                                    <span className={`font-mono ${getScoreColor(m2Score)}`}>({m2Score > 0 ? '+' : ''}{parseFloat(m2Score.toFixed(1))})</span>
                                 </div>
                             </div>
                         </div>

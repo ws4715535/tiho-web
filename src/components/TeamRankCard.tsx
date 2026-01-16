@@ -94,7 +94,7 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
                             {getContribution(data.member1Stats?.totalPT || 0, data.totalPT)}%
                         </span>
                         <span className={`font-mono ${getScoreColor(data.member1Stats?.totalPT || 0)}`}>
-                            ({(data.member1Stats?.totalPT || 0) > 0 ? '+' : ''}{data.member1Stats?.totalPT || 0})
+                            ({(data.member1Stats?.totalPT || 0) > 0 ? '+' : ''}{parseFloat((data.member1Stats?.totalPT || 0).toFixed(1))})
                         </span>
                     </div>
                 </div>
@@ -109,7 +109,7 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
                             {getContribution(data.member2Stats?.totalPT || 0, data.totalPT)}%
                         </span>
                         <span className={`font-mono ${getScoreColor(data.member2Stats?.totalPT || 0)}`}>
-                            ({(data.member2Stats?.totalPT || 0) > 0 ? '+' : ''}{data.member2Stats?.totalPT || 0})
+                            ({(data.member2Stats?.totalPT || 0) > 0 ? '+' : ''}{parseFloat((data.member2Stats?.totalPT || 0).toFixed(1))})
                         </span>
                     </div>
                 </div>
