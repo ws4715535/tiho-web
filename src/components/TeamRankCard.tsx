@@ -31,9 +31,22 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
      return 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700';
   };
 
-  const getContribution = (score: number, total: number) => {
-    if (total === 0) return 0;
-    return Math.round((score / total) * 100);
+  const calculateContribution = (s1: number, s2: number): [number, number] => {
+    const total = s1 + s2;
+    // Avoid division by zero or near zero
+    if (Math.abs(total) < 0.001) {
+        if (Math.abs(s1 - s2) < 0.001) return [50, 50];
+        return s1 > s2 ? [100, 0] : [0, 100];
+    }
+    const diff = s1 - s2;
+    // Formula: 50 + 50 * (diff / abs(total))
+    // This ensures:
+    // 1. Sum is 100%
+    // 2. Good performance relative to partner gets higher %
+    // 3. Positive score gets positive contribution (mostly)
+    const c1 = 50 + (50 * diff / Math.abs(total));
+    const c2 = 50 - (50 * diff / Math.abs(total));
+    return [Math.round(c1), Math.round(c2)];
   };
 
   const getScoreColor = (val: number) => {
@@ -41,6 +54,10 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
     if (val < 0) return 'text-green-500 dark:text-green-400';
     return 'text-slate-500 dark:text-slate-400';
   };
+
+  const m1Score = data.member1Stats?.totalPT || 0;
+  const m2Score = data.member2Stats?.totalPT || 0;
+  const [m1Contribution, m2Contribution] = calculateContribution(m1Score, m2Score);
 
   return (
     <div 
@@ -90,8 +107,8 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
                 <div className="flex flex-col items-center">
                     <span>{data.member1}</span>
                     <div className="flex items-center gap-1 text-[10px]">
-                        <span className={getScoreColor(getContribution(data.member1Stats?.totalPT || 0, data.totalPT))}>
-                            {getContribution(data.member1Stats?.totalPT || 0, data.totalPT)}%
+                        <span className={getScoreColor(m1Contribution)}>
+                            {m1Contribution}%
                         </span>
                         <span className={`font-mono ${getScoreColor(data.member1Stats?.totalPT || 0)}`}>
                             ({(data.member1Stats?.totalPT || 0) > 0 ? '+' : ''}{parseFloat((data.member1Stats?.totalPT || 0).toFixed(1))})
@@ -105,8 +122,8 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
                 <div className="flex flex-col items-center">
                     <span>{data.member2}</span>
                     <div className="flex items-center gap-1 text-[10px]">
-                        <span className={getScoreColor(getContribution(data.member2Stats?.totalPT || 0, data.totalPT))}>
-                            {getContribution(data.member2Stats?.totalPT || 0, data.totalPT)}%
+                        <span className={getScoreColor(m2Contribution)}>
+                            {m2Contribution}%
                         </span>
                         <span className={`font-mono ${getScoreColor(data.member2Stats?.totalPT || 0)}`}>
                             ({(data.member2Stats?.totalPT || 0) > 0 ? '+' : ''}{parseFloat((data.member2Stats?.totalPT || 0).toFixed(1))})

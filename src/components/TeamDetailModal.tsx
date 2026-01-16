@@ -33,13 +33,21 @@ export const TeamDetailModal: React.FC<TeamDetailModalProps> = ({ data, onClose 
   const m1Score = m1StatsData?.totalPT ?? 0;
   const m2Score = m2StatsData?.totalPT ?? 0;
   
-  const getContribution = (score: number, total: number) => {
-    if (total === 0) return 0;
-    return Math.round((score / total) * 100);
+  const calculateContribution = (s1: number, s2: number): [number, number] => {
+    const total = s1 + s2;
+    // Avoid division by zero or near zero
+    if (Math.abs(total) < 0.001) {
+        if (Math.abs(s1 - s2) < 0.001) return [50, 50];
+        return s1 > s2 ? [100, 0] : [0, 100];
+    }
+    const diff = s1 - s2;
+    // Formula: 50 + 50 * (diff / abs(total))
+    const c1 = 50 + (50 * diff / Math.abs(total));
+    const c2 = 50 - (50 * diff / Math.abs(total));
+    return [Math.round(c1), Math.round(c2)];
   };
 
-  const m1Contribution = getContribution(m1Score, data.totalPT);
-  const m2Contribution = getContribution(m2Score, data.totalPT);
+  const [m1Contribution, m2Contribution] = calculateContribution(m1Score, m2Score);
 
   const getScoreColor = (val: number) => {
     if (val > 0) return 'text-red-500 dark:text-red-400';
