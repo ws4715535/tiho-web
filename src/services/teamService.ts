@@ -9,6 +9,7 @@ export interface PairedTeam {
   member_1_name: string;
   member_2_name: string;
   total_score: number;
+  created_at?: string;
 }
 
 export interface TeamFormData {

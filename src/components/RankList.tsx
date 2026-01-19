@@ -97,12 +97,15 @@ export const RankList = () => {
                 return;
             }
 
-            // 2. Get Date Range
+            // 2. Get Date Range & Query End Date for Filtering
             let dateRange = '';
+            let queryEndDate: Date;
+
             if (week === 'Monthly') {
                 const totalWeeks = getWeeksInMonth(parsed.year, parsed.month);
                 const { startDate } = calculateWeekRange(parsed.year, parsed.month, 1);
                 const { endDate } = calculateWeekRange(parsed.year, parsed.month, totalWeeks);
+                queryEndDate = endDate;
                 
                 const formatDate = (d: Date) => {
                   const y = d.getFullYear();
@@ -112,8 +115,19 @@ export const RankList = () => {
                 };
                 dateRange = `${formatDate(startDate)} - ${formatDate(endDate)}`;
             } else {
-                dateRange = getWeekDateRange(parsed.year, parsed.month, week).replace(/\//g, '-');
+                const { endDate } = calculateWeekRange(parsed.year, parsed.month, week as number);
+                queryEndDate = endDate;
+                dateRange = getWeekDateRange(parsed.year, parsed.month, week as number).replace(/\//g, '-');
             }
+
+            // Filter teams: Hide teams created after the query period
+            const validTeams = teams.filter(team => {
+                if (!team.created_at) return true;
+                const createdAt = new Date(team.created_at);
+                // Set queryEndDate to end of day just in case (though calculateWeekRange does this)
+                // We compare timestamps. If createdAt > queryEndDate, it means team didn't exist yet.
+                return createdAt.getTime() <= queryEndDate.getTime();
+            });
 
             // Fetch from both arenas in parallel
             // Store IDs: University Town = 127, Lijiacun = 30
@@ -171,7 +185,7 @@ export const RankList = () => {
             // Map stats to teams
             const teamUpdates: { id: string; total_score: number }[] = [];
 
-            competitors = teams.map((team) => {
+            competitors = validTeams.map((team) => {
                 const member1 = playerStats.get(team.member_1_name);
                 const member2 = playerStats.get(team.member_2_name);
 
