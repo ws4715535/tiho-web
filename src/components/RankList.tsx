@@ -259,7 +259,8 @@ export const RankList = () => {
                         gamesPlayed: stats2.games,
                         ...m2Rates
                     },
-                    description: team.description
+                    description: team.description,
+                    status: team.status
                 };
             });
 

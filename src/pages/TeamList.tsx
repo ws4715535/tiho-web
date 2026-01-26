@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, Search, Loader2 } from 'lucide-react';
+import { ArrowLeft, Users, Search, Loader2, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { fetchAllTeams, PairedTeam } from '../services/teamService';
 
@@ -23,11 +23,19 @@ export const TeamList = () => {
     loadTeams();
   }, []);
 
-  const filteredTeams = teams.filter(team => 
-    team.team_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    team.member_1_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    team.member_2_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTeams = teams
+    .filter(team => 
+        team.team_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        team.member_1_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        team.member_2_name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+        // Sort by created_at ascending (oldest first)
+        // If created_at is missing, treat as oldest (or newest depending on preference, here oldest)
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateA - dateB;
+    });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20 animate-in fade-in duration-500">
@@ -88,10 +96,12 @@ export const TeamList = () => {
                     <span>&</span>
                     <span>{team.member_2_name}</span>
                     </div>
-                    {/* Display Score if > 0 */}
-                    {/* <div className="mt-1 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                        {team.total_score > 0 ? `积分: ${team.total_score}` : '暂无积分'}
-                    </div> */}
+                    {team.created_at && (
+                        <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-400">
+                            <Calendar className="w-3 h-3" />
+                            <span>成立时间: {new Date(team.created_at).toLocaleDateString()}</span>
+                        </div>
+                    )}
                 </div>
                 </div>
             ))}

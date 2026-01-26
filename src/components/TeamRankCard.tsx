@@ -61,7 +61,7 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
 
   return (
     <div 
-      className={`relative group mb-4 rounded-2xl p-5 select-none overflow-hidden transition-all hover:shadow-lg border-2 ${getBgStyle(data.rank)}`}
+      className={`relative group mb-4 rounded-2xl p-5 select-none overflow-hidden transition-all hover:shadow-lg border-2 ${getBgStyle(data.rank)} ${data.status === 'inactive' ? 'opacity-60 grayscale-[0.5]' : ''}`}
     >
       {/* Background Decor */}
       <div className="absolute -right-6 -top-6 opacity-5 dark:opacity-10 transform rotate-12 transition-transform group-hover:rotate-6">
@@ -97,9 +97,16 @@ export const TeamRankCard: React.FC<TeamRankCardProps> = ({ data, onClick }) => 
 
         {/* Team Info & Members */}
         <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-                {data.name}
-            </h3>
+            <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {data.name}
+                </h3>
+                {data.status === 'inactive' && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-400 border border-slate-300 dark:border-slate-600 uppercase tracking-wider">
+                        Inactive
+                    </span>
+                )}
+            </div>
             
             {/* Members List (Simplified) */}
             <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">

@@ -52,6 +52,7 @@ export interface Competitor {
       flyRate: number;
   };
   description?: string;
+  status?: 'active' | 'inactive';
 }
 
 export interface RankData {

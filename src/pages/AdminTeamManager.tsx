@@ -16,12 +16,14 @@ export const AdminTeamManager = () => {
   
   // Form State
   const [currentId, setCurrentId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     team_name: '',
     member_1_name: '',
     member_2_name: '',
     avatar_url: '',
-    description: ''
+    description: '',
+    status: 'active',
+    created_at: ''
   });
 
   // Fetch Teams
@@ -63,21 +65,43 @@ export const AdminTeamManager = () => {
   const openModal = (team?: PairedTeam) => {
     if (team) {
       setCurrentId(team.id);
+      // Format datetime-local string (YYYY-MM-DDTHH:mm)
+      let createdDate = '';
+      if (team.created_at) {
+          const d = new Date(team.created_at);
+          // Adjust to local ISO string for input type="datetime-local"
+          // We need YYYY-MM-DDTHH:mm
+          // Simple hack: use toISOString() but adjust for timezone manually or just use string manipulation
+          // Better:
+          const offset = d.getTimezoneOffset() * 60000;
+          const localISOTime = (new Date(d.getTime() - offset)).toISOString().slice(0, 16);
+          createdDate = localISOTime;
+      }
+
       setFormData({
         team_name: team.team_name,
         member_1_name: team.member_1_name,
         member_2_name: team.member_2_name,
         avatar_url: team.avatar_url || '',
-        description: team.description || ''
+        description: team.description || '',
+        status: team.status || 'active',
+        created_at: createdDate
       });
     } else {
       setCurrentId(null);
+      // Default to now
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      const localISOTime = (new Date(now.getTime() - offset)).toISOString().slice(0, 16);
+      
       setFormData({
         team_name: '',
         member_1_name: '',
         member_2_name: '',
         avatar_url: '',
-        description: ''
+        description: '',
+        status: 'active',
+        created_at: localISOTime
       });
     }
     setIsModalOpen(true);
@@ -97,7 +121,7 @@ export const AdminTeamManager = () => {
     setUploadingAvatar(true);
     try {
         const publicUrl = await uploadImage(file);
-        setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+        setFormData((prev: any) => ({ ...prev, avatar_url: publicUrl }));
     } catch (err) {
         console.error('Avatar upload failed:', err);
         alert('头像上传失败: ' + (err instanceof Error ? err.message : '未知错误'));
@@ -115,13 +139,25 @@ export const AdminTeamManager = () => {
     }
 
     setActionLoading(true);
+    
+    // Convert local datetime to UTC ISO string if needed, or just let Supabase handle ISO string
+    // Supabase timestamptz expects ISO string.
+    // formData.created_at is "YYYY-MM-DDTHH:mm" (local time from input)
+    // We should convert it to a full ISO string with timezone or UTC
+    
+    let submissionData = { ...formData };
+    if (formData.created_at) {
+        const d = new Date(formData.created_at);
+        submissionData.created_at = d.toISOString();
+    }
+
     try {
       if (currentId) {
         // Update
-        await updateTeam(currentId, formData);
+        await updateTeam(currentId, submissionData);
       } else {
         // Insert
-        await createTeam(formData);
+        await createTeam(submissionData);
       }
 
       setIsModalOpen(false);
@@ -219,7 +255,14 @@ export const AdminTeamManager = () => {
                                     </div>
                                 )}
                                 <div>
-                                    <h3 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">{team.team_name}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold text-slate-900 dark:text-white text-lg leading-tight">{team.team_name}</h3>
+                                        {team.status === 'inactive' && (
+                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400 border border-slate-200 dark:border-slate-600">
+                                                Inactive
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 max-w-[120px]">
                                         {team.description || '暂无描述'}
                                     </div>
@@ -373,6 +416,32 @@ export const AdminTeamManager = () => {
                                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none h-24"
                                     placeholder="输入战队口号或简介..."
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    成立时间
+                                </label>
+                                <input 
+                                    type="datetime-local" 
+                                    value={formData.created_at}
+                                    onChange={e => setFormData({...formData, created_at: e.target.value})}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                                    战队状态
+                                </label>
+                                <select
+                                    value={formData.status}
+                                    onChange={e => setFormData({...formData, status: e.target.value})}
+                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all appearance-none"
+                                >
+                                    <option value="active">🟢 活跃中 (Active)</option>
+                                    <option value="inactive">🔴 不活跃 (Inactive)</option>
+                                </select>
                             </div>
                         </div>
 

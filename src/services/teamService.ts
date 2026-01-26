@@ -10,6 +10,7 @@ export interface PairedTeam {
   member_2_name: string;
   total_score: number;
   created_at?: string;
+  status?: 'active' | 'inactive';
 }
 
 export interface TeamFormData {
@@ -18,6 +19,8 @@ export interface TeamFormData {
   member_2_name: string;
   avatar_url: string;
   description: string;
+  status?: 'active' | 'inactive';
+  created_at?: string;
 }
 
 // Memory Cache for Team Data
@@ -36,7 +39,7 @@ export const fetchAllTeams = async (forceRefresh = false): Promise<PairedTeam[]>
   const { data, error } = await supabase
     .from('paired_teams')
     .select('*')
-    .order('total_score', { ascending: false });
+    .order('created_at', { ascending: true }); // Default sort by created_at ascending (oldest first)
 
   if (error) {
     throw new Error(error.message);
