@@ -92,7 +92,7 @@ export const IndividualMatchIntro = () => {
             </h3>
             <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               <p>
-                「个人排位赛」是 Tiho Club 的核心常驻赛事。无论你是刚刚入门的新手，还是身经百战的雀豪，这里都有属于你的位置。
+                「个人排位赛」
               </p>
               <p>
                 通过每一场对局累积积分，实时更新周榜与月榜排名。每周与每月结算时，位于榜单前列的选手将获得丰厚奖励与荣誉，用实力证明你是真正的天和最强！

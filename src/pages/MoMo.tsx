@@ -68,7 +68,7 @@ const transformDataToProfiles = (data: Competitor[]): Profile[] => {
 
     const descs = [
       '只有被选中的人才能看见岭上开花。',
-      '麻将不是运气游戏，是概率的艺术。',
+      '这不是运气游戏，是概率的艺术。',
       '天下武功，唯快不破。',
       '无声的立直才是最致命的。',
       '发牌员是我亲戚。',

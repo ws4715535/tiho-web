@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun, Cpu, Heart, Menu, Users, LayoutDashboard, Lock } from 'lucide-react';
 import { Button } from './ui/Button';
-import tihoLogo from '../assets/tiho_logo.png';
 
 export type Theme = 'light' | 'dark' | 'cyberpunk';
 
@@ -61,12 +60,14 @@ export const Header: React.FC<HeaderProps> = ({ theme, setTheme }) => {
             className="flex items-center space-x-2 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            <img src={tihoLogo} alt="Riichi.Pro" className="h-10" />
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-black text-sm">T</span>
+            </div>
             <div>
               <h1 className="text-lg font-extrabold tracking-tighter text-slate-900 dark:text-white italic uppercase leading-none transition-colors brand-neon">
                 TIHO Riichi<span className="text-indigo-600 dark:text-indigo-400">.Pro</span>
               </h1>
-              <p className="text-[10px] font-mono tracking-widest uppercase gradient-text-run">天和雀庄-联赛数据</p>
+              <p className="text-[10px] font-mono tracking-widest uppercase gradient-text-run">数据榜</p>
             </div>
           </div>
           

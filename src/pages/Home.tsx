@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
 import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import tihoLogo from '../assets/tiho_logo.png';
 import { preloadMoMoData } from '../services/momoService';
 import { supabase } from '../lib/supabase/client';
 
@@ -152,15 +151,17 @@ export const Home = () => {
       <div className="text-center space-y-6">
         <div className="relative inline-block">
             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur opacity-20 animate-pulse"></div>
-            <img src={tihoLogo} alt="Tiho Club" className="relative w-24 h-24 mx-auto rounded-full shadow-xl" />
+            <div className="relative w-24 h-24 mx-auto rounded-full shadow-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <span className="text-white font-black text-4xl tracking-tighter">T</span>
+            </div>
         </div>
         
         <div className="space-y-2">
             <h1 className="text-4xl sm:text-5xl font-black tracking-tighter text-slate-900 dark:text-white italic uppercase brand-neon">
-                TIHO <span className="text-indigo-600 dark:text-indigo-400">CLUB</span>
+                TIHO <span className="text-indigo-600 dark:text-indigo-400"></span>
             </h1>
             <p className="text-sm sm:text-base font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
-                西安天和 · 立直麻雀俱乐部
+                联赛积分榜
             </p>
         </div>
 
@@ -296,12 +297,13 @@ export const Home = () => {
                         汇聚各路高手，定期举办交流赛与教学活动，共同进步。
                     </p>
                     <div className="inline-flex items-center text-sm font-bold text-emerald-600 dark:text-emerald-400 group-hover:underline">
-                        加入俱乐部 <ArrowRight className="ml-1 w-4 h-4" />
+                        加入联赛积分 <ArrowRight className="ml-1 w-4 h-4" />
                     </div>
                 </div>
             </div>
         </div>
 
+        {/* 备案要求暂时隐藏
         <div 
           onClick={() => navigate('/momo')}
           className="p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group cursor-pointer relative overflow-hidden"
@@ -315,6 +317,7 @@ export const Home = () => {
                 不仅是竞技，更是交友。心动功能❤️帮你发现身边和全国的雀友，开启你的心动对局。
             </p>
         </div>
+        */}
 
         <div 
           onClick={() => navigate('/data-analysis')}
@@ -380,9 +383,14 @@ export const Home = () => {
           </div>
         </div>
 
-        <p className="text-xs text-slate-400 dark:text-slate-600 font-mono">
-            © 2025 TIHO Riichi Club. All rights reserved.
-        </p>
+        <a 
+          href="https://beian.miit.gov.cn/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-xs text-slate-400 dark:text-slate-600 font-mono hover:text-slate-500 dark:hover:text-slate-500 transition-colors"
+        >
+          陕ICP备2026001694号-2
+        </a>
       </div>
     </div>
   );

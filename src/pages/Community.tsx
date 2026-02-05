@@ -94,7 +94,7 @@ export const Community = () => {
                   </div>
                   
                   <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-900/20 text-amber-800 dark:text-amber-200">
-                      💡 如果群二维码已过期或无法扫码，请直接添加官方微信，备注“加入俱乐部”，管理员会邀请您入群。
+                      💡 如果群二维码已过期或无法扫码，请直接添加官方微信，备注“加入”，管理员会邀请您入群。
                   </p>
               </div>
            </div>
@@ -116,7 +116,7 @@ export const Community = () => {
           </div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">定期活动</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            除了正式联赛，我们还会不定期举办娱乐赛、教学讲座、线下聚会等丰富多彩的活动，让大家在紧张的竞技之余，享受麻将带来的纯粹快乐。
+            除了正式联赛，我们还会不定期举办娱乐赛、教学讲座、线下聚会等丰富多彩的活动，让大家在紧张的竞技之余，享受游戏带来的纯粹快乐。
           </p>
         </section>
 
