@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { preloadMoMoData } from '../services/momoService';
 import { supabase } from '../lib/supabase/client';
