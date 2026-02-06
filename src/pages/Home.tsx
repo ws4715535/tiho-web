@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trophy, TrendingUp, Users, ArrowRight, Shield, Activity, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { preloadMoMoData } from '../services/momoService';
 import { supabase } from '../lib/supabase/client';
@@ -361,6 +361,7 @@ export const Home = () => {
 
       {/* Footer / Info */}
       <div className="text-center pt-8 border-t border-slate-200 dark:border-slate-800">
+        {/* 审核要求暂时隐藏门店地址
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8 text-left">
           <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-3">
@@ -382,6 +383,7 @@ export const Home = () => {
             </p>
           </div>
         </div>
+        */}
 
         <a 
           href="https://beian.miit.gov.cn/" 
